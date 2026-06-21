@@ -1,4 +1,4 @@
-package uz.customs.customs_control_app
+package tj.customs.customs_control_app
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

@@ -63,9 +63,11 @@ class _LockScreenState extends ConsumerState<LockScreen> {
             children: [
               const Center(child: BrandLogo(size: 96)),
               const SizedBox(height: 24),
-              Text(l10n.appTitle,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                l10n.appTitle,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 32),
               TextField(
                 controller: _pin,

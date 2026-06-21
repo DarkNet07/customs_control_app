@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
+import '../../core/auth/lock_controller.dart';
 import '../../core/images/image_service.dart';
 import '../../core/l10n/l10n.dart';
 import '../../core/plate/plate_formats.dart';
@@ -101,13 +102,25 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
   }
 
   Future<void> _addPhotoFromCamera() async {
-    final photo = await ref.read(imageServiceProvider).captureFromCamera();
-    if (photo != null) setState(() => _photos.add(photo));
+    final lock = ref.read(lockProvider.notifier);
+    lock.suspendAutoLock();
+    try {
+      final photo = await ref.read(imageServiceProvider).captureFromCamera();
+      if (photo != null) setState(() => _photos.add(photo));
+    } finally {
+      lock.resumeAutoLock();
+    }
   }
 
   Future<void> _addPhotosFromGallery() async {
-    final photos = await ref.read(imageServiceProvider).pickFromGallery();
-    if (photos.isNotEmpty) setState(() => _photos.addAll(photos));
+    final lock = ref.read(lockProvider.notifier);
+    lock.suspendAutoLock();
+    try {
+      final photos = await ref.read(imageServiceProvider).pickFromGallery();
+      if (photos.isNotEmpty) setState(() => _photos.addAll(photos));
+    } finally {
+      lock.resumeAutoLock();
+    }
   }
 
   Future<void> _pickDateTime() async {
@@ -217,11 +230,14 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
     return companies.when(
       loading: () => const LinearProgressIndicator(),
       error: (e, _) => Text('$e'),
-      data: (list) => Row(
+      data: (list) {
+        final selected = list.any((c) => c.id == _companyId) ? _companyId : null;
+        return Row(
         children: [
           Expanded(
             child: DropdownButtonFormField<int>(
-              initialValue: _companyId,
+              key: ValueKey('company-$selected'),
+              initialValue: selected,
               isExpanded: true,
               decoration: InputDecoration(
                 labelText: l10n.company,
@@ -247,7 +263,8 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
             },
           ),
         ],
-      ),
+        );
+      },
     );
   }
 
@@ -310,11 +327,14 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
     return makes.when(
       loading: () => const LinearProgressIndicator(),
       error: (e, _) => Text('$e'),
-      data: (list) => Row(
+      data: (list) {
+        final selected = list.any((m) => m.id == _makeId) ? _makeId : null;
+        return Row(
         children: [
           Expanded(
             child: DropdownButtonFormField<int>(
-              initialValue: _makeId,
+              key: ValueKey('make-$selected'),
+              initialValue: selected,
               isExpanded: true,
               decoration: InputDecoration(
                 labelText: l10n.vehicleMake,
@@ -347,7 +367,8 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
             },
           ),
         ],
-      ),
+        );
+      },
     );
   }
 
@@ -367,12 +388,14 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
     return models.when(
       loading: () => const LinearProgressIndicator(),
       error: (e, _) => Text('$e'),
-      data: (list) => Row(
+      data: (list) {
+        final selected = list.any((m) => m.id == _modelId) ? _modelId : null;
+        return Row(
         children: [
           Expanded(
             child: DropdownButtonFormField<int>(
-              initialValue:
-                  list.any((m) => m.id == _modelId) ? _modelId : null,
+              key: ValueKey('model-$selected'),
+              initialValue: selected,
               isExpanded: true,
               decoration: InputDecoration(
                 labelText: l10n.vehicleModel,
@@ -399,7 +422,8 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
             },
           ),
         ],
-      ),
+        );
+      },
     );
   }
 
@@ -408,11 +432,15 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
     return cargo.when(
       loading: () => const LinearProgressIndicator(),
       error: (e, _) => Text('$e'),
-      data: (list) => Row(
+      data: (list) {
+        final selected =
+            list.any((c) => c.id == _cargoTypeId) ? _cargoTypeId : null;
+        return Row(
         children: [
           Expanded(
             child: DropdownButtonFormField<int>(
-              initialValue: _cargoTypeId,
+              key: ValueKey('cargo-$selected'),
+              initialValue: selected,
               isExpanded: true,
               decoration: InputDecoration(
                 labelText: l10n.cargoType,
@@ -440,7 +468,8 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
             },
           ),
         ],
-      ),
+        );
+      },
     );
   }
 

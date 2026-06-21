@@ -10,18 +10,13 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
 
   final container = ProviderContainer(
-    overrides: [
-      sharedPreferencesProvider.overrideWithValue(prefs),
-    ],
+    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
   );
 
   // Seed dictionaries on first launch.
   await container.read(dictionaryRepositoryProvider).seedIfEmpty();
 
   runApp(
-    UncontrolledProviderScope(
-      container: container,
-      child: const CustomsApp(),
-    ),
+    UncontrolledProviderScope(container: container, child: const CustomsApp()),
   );
 }
