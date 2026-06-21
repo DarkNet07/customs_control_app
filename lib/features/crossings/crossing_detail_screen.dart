@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import '../../core/db/app_database.dart';
 import '../../core/l10n/l10n.dart';
 import '../../core/providers.dart';
+import '../../core/widgets/flag_icon.dart';
 import 'widgets/photo_viewer.dart';
 import 'widgets/plate_label.dart';
 
@@ -216,14 +217,27 @@ class _HistoryTile extends StatelessWidget {
     return '$value';
   }
 
+  /// A single value chip: plate shows flag + number (без Flexible, чтобы можно
+  /// было класть в Wrap), остальные — обычный текст.
   Widget _value(String key, Object? value, String country) {
     if (key == 'plateNumber' && value != null) {
-      return PlateLabel(plateNumber: '$value', country: country, flagWidth: 20);
+      final flag = FlagIcon(country, width: 18);
+      final txt = Text(
+        '$value',
+        style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
+      );
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: country == 'tj'
+            ? [flag, const SizedBox(width: 5), txt]
+            : [txt, const SizedBox(width: 5), flag],
+      );
     }
     return Text(_fieldValue(key, value));
   }
 
-  /// One changed field: "label: from → to" (or just "label: to" on create).
+  /// One changed field on a single line: "label | from → to"
+  /// (or "label | to" on create). Двухколоночная раскладка как у остальных строк.
   Widget _changeRow(
     BuildContext context,
     AppLocalizations l10n,
@@ -234,20 +248,31 @@ class _HistoryTile extends StatelessWidget {
     final from = change['from'];
     final to = change['to'];
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Wrap(
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: 6,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${_fieldLabel(l10n, key)}:',
-            style: const TextStyle(fontWeight: FontWeight.w600),
+          SizedBox(
+            width: 120,
+            child: Text(
+              '${_fieldLabel(l10n, key)}:',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
-          if (from != null) ...[
-            _value(key, from, country),
-            const Icon(Icons.arrow_forward, size: 16),
-          ],
-          _value(key, to, country),
+          Expanded(
+            child: Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 6,
+              runSpacing: 2,
+              children: [
+                if (from != null) ...[
+                  _value(key, from, country),
+                  const Icon(Icons.arrow_forward, size: 16),
+                ],
+                _value(key, to, country),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -281,7 +306,7 @@ class _HistoryTile extends StatelessWidget {
         title: Text(label),
         subtitle: Text(df.format(entry.changedAt)),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
-        childrenPadding: const EdgeInsets.fromLTRB(2, 0, 2, 2),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
         children: changes != null
             ? [
                 if (changes.isEmpty)
@@ -301,16 +326,22 @@ class _HistoryTile extends StatelessWidget {
                 for (final e in snap.entries)
                   if (e.key != 'plateCountry')
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 3),
-                      child: Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 6,
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '${_fieldLabel(l10n, e.key)}:',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          SizedBox(
+                            width: 100,
+                            child: Text(
+                              '${_fieldLabel(l10n, e.key)}:',
+                              maxLines: 1,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                           ),
-                          _value(e.key, e.value, country),
+                          Expanded(child: _value(e.key, e.value, country)),
                         ],
                       ),
                     ),

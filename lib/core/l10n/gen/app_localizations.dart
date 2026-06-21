@@ -227,7 +227,7 @@ abstract class AppLocalizations {
   /// No description provided for @cargoQuantity.
   ///
   /// In ru, this message translates to:
-  /// **'Количество груза'**
+  /// **'Кол. груза'**
   String get cargoQuantity;
 
   /// No description provided for @quantityUnit.

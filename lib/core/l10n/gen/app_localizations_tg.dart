@@ -72,7 +72,7 @@ class AppLocalizationsTg extends AppLocalizations {
   String get tajikistan => 'Тоҷикистон';
 
   @override
-  String get cargoQuantity => 'Миқдори бор';
+  String get cargoQuantity => 'Миқд. бор';
 
   @override
   String get quantityUnit => 'Воҳид';

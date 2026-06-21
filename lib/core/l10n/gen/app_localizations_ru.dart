@@ -72,7 +72,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get tajikistan => 'Таджикистан';
 
   @override
-  String get cargoQuantity => 'Количество груза';
+  String get cargoQuantity => 'Кол. груза';
 
   @override
   String get quantityUnit => 'Ед. изм.';
