@@ -70,8 +70,10 @@ class _Content extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         if (topCompanies.isNotEmpty) ...[
-          Text(l10n.topCompanies,
-              style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            l10n.topCompanies,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 12),
           SizedBox(
             height: 220,
@@ -80,8 +82,10 @@ class _Content extends StatelessWidget {
         ],
         const SizedBox(height: 24),
         if (byCargo.isNotEmpty) ...[
-          Text(l10n.byCargoType,
-              style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            l10n.byCargoType,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 12),
           SizedBox(height: 220, child: _CargoPieChart(data: byCargo)),
         ],
@@ -103,8 +107,7 @@ class _StatCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              Text('$value',
-                  style: Theme.of(context).textTheme.headlineMedium),
+              Text('$value', style: Theme.of(context).textTheme.headlineMedium),
               const SizedBox(height: 4),
               Text(label, textAlign: TextAlign.center),
             ],
@@ -127,19 +130,26 @@ class _CompanyBarChart extends StatelessWidget {
         maxY: maxY + 1,
         barGroups: [
           for (var i = 0; i < data.length; i++)
-            BarChartGroupData(x: i, barRods: [
-              BarChartRodData(
+            BarChartGroupData(
+              x: i,
+              barRods: [
+                BarChartRodData(
                   toY: data[i].value.toDouble(),
-                  color: Theme.of(context).colorScheme.primary),
-            ]),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ],
+            ),
         ],
         titlesData: FlTitlesData(
-          leftTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -176,6 +186,7 @@ class _CargoPieChart extends StatelessWidget {
       ..sort((a, b) => b.value.compareTo(a.value));
     final colors = Colors.primaries;
     return Row(
+      spacing: 4,
       children: [
         Expanded(
           flex: 2,
@@ -189,12 +200,15 @@ class _CargoPieChart extends StatelessWidget {
                     color: colors[i % colors.length],
                     radius: 70,
                     titleStyle: const TextStyle(
-                        fontSize: 11, color: Colors.white),
+                      fontSize: 11,
+                      color: Colors.white,
+                    ),
                   ),
               ],
             ),
           ),
         ),
+        SizedBox(width: 4),
         Expanded(
           flex: 3,
           child: Column(
@@ -205,14 +219,17 @@ class _CargoPieChart extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                        width: 12,
-                        height: 12,
-                        color: colors[i % colors.length]),
+                      width: 12,
+                      height: 12,
+                      color: colors[i % colors.length],
+                    ),
                     const SizedBox(width: 6),
                     Expanded(
-                      child: Text(entries[i].key,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12)),
+                      child: Text(
+                        entries[i].key,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 12),
+                      ),
                     ),
                   ],
                 ),

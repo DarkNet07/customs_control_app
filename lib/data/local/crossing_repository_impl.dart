@@ -159,7 +159,7 @@ class LocalCrossingRepository implements CrossingRepository {
           await db.into(db.crossings).insert(_companion(input, now: now));
       await _insertPhotos(id, input);
       final view = await getById(id);
-      await db.recordHistory(id, 'create', _snapshot(view));
+      await db.recordHistory(id, 'create', _createSnap(view));
       return id;
     });
   }
@@ -168,7 +168,6 @@ class LocalCrossingRepository implements CrossingRepository {
   Future<void> update(int id, CrossingInput input) async {
     await db.transaction(() async {
       final before = await getById(id);
-      await db.recordHistory(id, 'update', _snapshot(before));
 
       await (db.update(db.crossings)..where((t) => t.id.equals(id))).write(
         CrossingsCompanion(
@@ -193,6 +192,10 @@ class LocalCrossingRepository implements CrossingRepository {
             ..where((t) => t.crossingId.equals(id)))
           .go();
       await _insertPhotos(id, input);
+
+      // Record only the fields that actually changed (before → after).
+      final after = await getById(id);
+      await db.recordHistory(id, 'update', _updateSnap(before, after));
     });
   }
 
@@ -200,7 +203,7 @@ class LocalCrossingRepository implements CrossingRepository {
   Future<void> softDelete(int id) async {
     await db.transaction(() async {
       final before = await getById(id);
-      await db.recordHistory(id, 'delete', _snapshot(before));
+      await db.recordHistory(id, 'delete', _deleteSnap(before));
       await (db.update(db.crossings)..where((t) => t.id.equals(id))).write(
         CrossingsCompanion(
           isDeleted: const Value(true),
@@ -230,20 +233,57 @@ class LocalCrossingRepository implements CrossingRepository {
     }
   }
 
-  Map<String, dynamic> _snapshot(CrossingView? v) {
+  /// Flat, comparable field values for a crossing (used to diff revisions).
+  Map<String, String?> _flat(CrossingView? v) {
     if (v == null) return {};
     final c = v.crossing;
     return {
       'plateNumber': c.plateNumber,
-      'plateCountry': c.plateCountry,
       'company': v.companyName,
       'vehicle': v.vehicleLabel,
       'cargoType': v.cargoTypeName,
-      'cargoQuantity': c.cargoQuantity,
+      'cargoQuantity': c.cargoQuantity?.toString(),
       'quantityUnit': c.quantityUnit,
       'crossedAt': c.crossedAt.toIso8601String(),
       'note': c.note,
-      'photos': v.photos.length,
+      'photos': v.photos.length.toString(),
+    };
+  }
+
+  /// Create: every field as `from: null → to: value`.
+  Map<String, dynamic> _createSnap(CrossingView? v) {
+    final flat = _flat(v);
+    return {
+      'plateCountry': v?.crossing.plateCountry,
+      'changes': {
+        for (final e in flat.entries)
+          if (e.value != null && e.value!.isNotEmpty)
+            e.key: {'from': null, 'to': e.value},
+      },
+    };
+  }
+
+  /// Update: only the fields whose value changed (before → after).
+  Map<String, dynamic> _updateSnap(CrossingView? before, CrossingView? after) {
+    final a = _flat(before);
+    final b = _flat(after);
+    final changes = <String, dynamic>{};
+    for (final key in b.keys) {
+      if (a[key] != b[key]) {
+        changes[key] = {'from': a[key], 'to': b[key]};
+      }
+    }
+    return {
+      'plateCountry': after?.crossing.plateCountry,
+      'changes': changes,
+    };
+  }
+
+  /// Delete: no field list, just keep country for context.
+  Map<String, dynamic> _deleteSnap(CrossingView? before) {
+    return {
+      'plateCountry': before?.crossing.plateCountry,
+      'changes': <String, dynamic>{},
     };
   }
 }

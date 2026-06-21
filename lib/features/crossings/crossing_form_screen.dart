@@ -138,19 +138,23 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
     );
     if (time == null) return;
     setState(() {
-      _crossedAt =
-          DateTime(date.year, date.month, date.day, time.hour, time.minute);
+      _crossedAt = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
     });
   }
 
   Future<void> _save() async {
     final l10n = context.l10n;
     if (!_formKey.currentState!.validate()) return;
-    if (_companyId == null ||
-        _makeId == null ||
-        _cargoTypeId == null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(l10n.fieldRequired)));
+    if (_companyId == null || _makeId == null || _cargoTypeId == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.fieldRequired)));
       return;
     }
     final input = CrossingInput(
@@ -162,10 +166,15 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
       modelId: _modelId,
       cargoTypeId: _cargoTypeId!,
       crossedAt: _crossedAt,
-      cargoQuantity: double.tryParse(_quantityController.text.replaceAll(',', '.')),
-      quantityUnit:
-          _unitController.text.trim().isEmpty ? null : _unitController.text.trim(),
-      note: _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+      cargoQuantity: double.tryParse(
+        _quantityController.text.replaceAll(',', '.'),
+      ),
+      quantityUnit: _unitController.text.trim().isEmpty
+          ? null
+          : _unitController.text.trim(),
+      note: _noteController.text.trim().isEmpty
+          ? null
+          : _noteController.text.trim(),
       photoPaths: _photos,
     );
     final repo = ref.read(crossingRepositoryProvider);
@@ -186,9 +195,7 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEdit ? l10n.editCrossing : l10n.addCrossing),
-        actions: [
-          TextButton(onPressed: _save, child: Text(l10n.save)),
-        ],
+        actions: [TextButton(onPressed: _save, child: Text(l10n.save))],
       ),
       body: Form(
         key: _formKey,
@@ -232,38 +239,42 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
       loading: () => const LinearProgressIndicator(),
       error: (e, _) => Text('$e'),
       data: (list) {
-        final selected = list.any((c) => c.id == _companyId) ? _companyId : null;
+        final selected = list.any((c) => c.id == _companyId)
+            ? _companyId
+            : null;
         return Row(
-        children: [
-          Expanded(
-            child: DropdownButtonFormField<int>(
-              key: ValueKey('company-$selected'),
-              initialValue: selected,
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: l10n.company,
-                border: const OutlineInputBorder(),
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<int>(
+                key: ValueKey('company-$selected'),
+                initialValue: selected,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: l10n.company,
+                  border: const OutlineInputBorder(),
+                ),
+                items: [
+                  for (final c in list)
+                    DropdownMenuItem(value: c.id, child: Text(c.name)),
+                ],
+                onChanged: (v) => setState(() => _companyId = v),
+                validator: (v) => v == null ? l10n.fieldRequired : null,
               ),
-              items: [
-                for (final c in list)
-                  DropdownMenuItem(value: c.id, child: Text(c.name)),
-              ],
-              onChanged: (v) => setState(() => _companyId = v),
-              validator: (v) => v == null ? l10n.fieldRequired : null,
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline),
-            tooltip: l10n.addCompanyTitle,
-            onPressed: () async {
-              final name = await showTextInputDialog(context,
-                  title: l10n.addCompanyTitle);
-              if (name == null) return;
-              final id = await ref.read(companyRepositoryProvider).add(name);
-              setState(() => _companyId = id);
-            },
-          ),
-        ],
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline),
+              tooltip: l10n.addCompanyTitle,
+              onPressed: () async {
+                final name = await showTextInputDialog(
+                  context,
+                  title: l10n.addCompanyTitle,
+                );
+                if (name == null) return;
+                final id = await ref.read(companyRepositoryProvider).add(name);
+                setState(() => _companyId = id);
+              },
+            ),
+          ],
         );
       },
     );
@@ -320,6 +331,27 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
             labelText: l10n.plateNumber,
             hintText: _format.label,
             border: const OutlineInputBorder(),
+            // UZ flag on the right, TJ flag on the left — как на реальных номерах.
+            prefixIcon: _country == 'tj'
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: FlagIcon('tj', width: 26),
+                  )
+                : null,
+            prefixIconConstraints: const BoxConstraints(
+              minWidth: 0,
+              minHeight: 0,
+            ),
+            suffixIcon: _country == 'uz'
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: FlagIcon('uz', width: 26),
+                  )
+                : null,
+            suffixIconConstraints: const BoxConstraints(
+              minWidth: 0,
+              minHeight: 0,
+            ),
           ),
           validator: (v) {
             if (v == null || v.trim().isEmpty) return l10n.fieldRequired;
@@ -339,43 +371,46 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
       data: (list) {
         final selected = list.any((m) => m.id == _makeId) ? _makeId : null;
         return Row(
-        children: [
-          Expanded(
-            child: DropdownButtonFormField<int>(
-              key: ValueKey('make-$selected'),
-              initialValue: selected,
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: l10n.vehicleMake,
-                border: const OutlineInputBorder(),
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<int>(
+                key: ValueKey('make-$selected'),
+                initialValue: selected,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: l10n.vehicleMake,
+                  border: const OutlineInputBorder(),
+                ),
+                items: [
+                  for (final m in list)
+                    DropdownMenuItem(value: m.id, child: Text(m.name)),
+                ],
+                onChanged: (v) => setState(() {
+                  _makeId = v;
+                  _modelId = null;
+                }),
+                validator: (v) => v == null ? l10n.fieldRequired : null,
               ),
-              items: [
-                for (final m in list)
-                  DropdownMenuItem(value: m.id, child: Text(m.name)),
-              ],
-              onChanged: (v) => setState(() {
-                _makeId = v;
-                _modelId = null;
-              }),
-              validator: (v) => v == null ? l10n.fieldRequired : null,
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline),
-            tooltip: l10n.addMakeTitle,
-            onPressed: () async {
-              final name =
-                  await showTextInputDialog(context, title: l10n.addMakeTitle);
-              if (name == null) return;
-              final id =
-                  await ref.read(dictionaryRepositoryProvider).addMake(name);
-              setState(() {
-                _makeId = id;
-                _modelId = null;
-              });
-            },
-          ),
-        ],
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline),
+              tooltip: l10n.addMakeTitle,
+              onPressed: () async {
+                final name = await showTextInputDialog(
+                  context,
+                  title: l10n.addMakeTitle,
+                );
+                if (name == null) return;
+                final id = await ref
+                    .read(dictionaryRepositoryProvider)
+                    .addMake(name);
+                setState(() {
+                  _makeId = id;
+                  _modelId = null;
+                });
+              },
+            ),
+          ],
         );
       },
     );
@@ -400,37 +435,40 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
       data: (list) {
         final selected = list.any((m) => m.id == _modelId) ? _modelId : null;
         return Row(
-        children: [
-          Expanded(
-            child: DropdownButtonFormField<int>(
-              key: ValueKey('model-$selected'),
-              initialValue: selected,
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: l10n.vehicleModel,
-                border: const OutlineInputBorder(),
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<int>(
+                key: ValueKey('model-$selected'),
+                initialValue: selected,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: l10n.vehicleModel,
+                  border: const OutlineInputBorder(),
+                ),
+                items: [
+                  for (final m in list)
+                    DropdownMenuItem(value: m.id, child: Text(m.name)),
+                ],
+                onChanged: (v) => setState(() => _modelId = v),
               ),
-              items: [
-                for (final m in list)
-                  DropdownMenuItem(value: m.id, child: Text(m.name)),
-              ],
-              onChanged: (v) => setState(() => _modelId = v),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline),
-            tooltip: l10n.addModelTitle,
-            onPressed: () async {
-              final name = await showTextInputDialog(context,
-                  title: l10n.addModelTitle, hint: l10n.addModelHint);
-              if (name == null) return;
-              final id = await ref
-                  .read(dictionaryRepositoryProvider)
-                  .addModel(_makeId!, name);
-              setState(() => _modelId = id);
-            },
-          ),
-        ],
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline),
+              tooltip: l10n.addModelTitle,
+              onPressed: () async {
+                final name = await showTextInputDialog(
+                  context,
+                  title: l10n.addModelTitle,
+                  hint: l10n.addModelHint,
+                );
+                if (name == null) return;
+                final id = await ref
+                    .read(dictionaryRepositoryProvider)
+                    .addModel(_makeId!, name);
+                setState(() => _modelId = id);
+              },
+            ),
+          ],
         );
       },
     );
@@ -442,41 +480,44 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
       loading: () => const LinearProgressIndicator(),
       error: (e, _) => Text('$e'),
       data: (list) {
-        final selected =
-            list.any((c) => c.id == _cargoTypeId) ? _cargoTypeId : null;
+        final selected = list.any((c) => c.id == _cargoTypeId)
+            ? _cargoTypeId
+            : null;
         return Row(
-        children: [
-          Expanded(
-            child: DropdownButtonFormField<int>(
-              key: ValueKey('cargo-$selected'),
-              initialValue: selected,
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: l10n.cargoType,
-                border: const OutlineInputBorder(),
+          children: [
+            Expanded(
+              child: DropdownButtonFormField<int>(
+                key: ValueKey('cargo-$selected'),
+                initialValue: selected,
+                isExpanded: true,
+                decoration: InputDecoration(
+                  labelText: l10n.cargoType,
+                  border: const OutlineInputBorder(),
+                ),
+                items: [
+                  for (final c in list)
+                    DropdownMenuItem(value: c.id, child: Text(c.name)),
+                ],
+                onChanged: (v) => setState(() => _cargoTypeId = v),
+                validator: (v) => v == null ? l10n.fieldRequired : null,
               ),
-              items: [
-                for (final c in list)
-                  DropdownMenuItem(value: c.id, child: Text(c.name)),
-              ],
-              onChanged: (v) => setState(() => _cargoTypeId = v),
-              validator: (v) => v == null ? l10n.fieldRequired : null,
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline),
-            tooltip: l10n.addCargoTypeTitle,
-            onPressed: () async {
-              final name = await showTextInputDialog(context,
-                  title: l10n.addCargoTypeTitle);
-              if (name == null) return;
-              final id = await ref
-                  .read(dictionaryRepositoryProvider)
-                  .addCargoType(name);
-              setState(() => _cargoTypeId = id);
-            },
-          ),
-        ],
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline),
+              tooltip: l10n.addCargoTypeTitle,
+              onPressed: () async {
+                final name = await showTextInputDialog(
+                  context,
+                  title: l10n.addCargoTypeTitle,
+                );
+                if (name == null) return;
+                final id = await ref
+                    .read(dictionaryRepositoryProvider)
+                    .addCargoType(name);
+                setState(() => _cargoTypeId = id);
+              },
+            ),
+          ],
         );
       },
     );
@@ -490,8 +531,7 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
           flex: 2,
           child: TextFormField(
             controller: _quantityController,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
               labelText: '${l10n.cargoQuantity} (${l10n.optional})',
               border: const OutlineInputBorder(),
@@ -562,8 +602,12 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.file(File(ph.thumbPath),
-                          width: 96, height: 96, fit: BoxFit.cover),
+                      child: Image.file(
+                        File(ph.thumbPath),
+                        width: 96,
+                        height: 96,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     Positioned(
                       right: 0,

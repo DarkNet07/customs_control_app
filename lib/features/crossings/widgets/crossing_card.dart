@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/providers.dart';
+import 'plate_label.dart';
 
 class CrossingCard extends StatelessWidget {
   const CrossingCard({super.key, required this.view, this.onTap});
@@ -18,6 +19,7 @@ class CrossingCard extends StatelessWidget {
     final thumb = view.photos.isNotEmpty ? view.photos.first.thumbPath : null;
     return Card(
       clipBehavior: Clip.antiAlias,
+      
       child: ListTile(
         leading: SizedBox(
           width: 56,
@@ -29,10 +31,9 @@ class CrossingCard extends StatelessWidget {
                   child: const Icon(Icons.local_shipping_outlined),
                 ),
         ),
-        title: Text(
-          c.plateNumber,
-          style: const TextStyle(
-              fontWeight: FontWeight.bold, letterSpacing: 1.2),
+        title: PlateLabel(
+          plateNumber: c.plateNumber,
+          country: c.plateCountry,
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

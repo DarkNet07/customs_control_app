@@ -10,9 +10,9 @@ import '../../core/db/app_database.dart';
 import '../../core/l10n/l10n.dart';
 import '../../core/providers.dart';
 import 'widgets/photo_viewer.dart';
+import 'widgets/plate_label.dart';
 
-final _detailProvider =
-    FutureProvider.family.autoDispose((ref, int id) async {
+final _detailProvider = FutureProvider.family.autoDispose((ref, int id) async {
   // Re-fetch when crossings change.
   ref.watch(crossingsProvider);
   final view = await ref.watch(crossingRepositoryProvider).getById(id);
@@ -39,7 +39,8 @@ class CrossingDetailScreen extends ConsumerWidget {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-                backgroundColor: Theme.of(ctx).colorScheme.error),
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+            ),
             onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(l10n.delete),
           ),
@@ -122,13 +123,40 @@ class _Body extends StatelessWidget {
             ),
           ),
         const SizedBox(height: 16),
-        _row(context, l10n.plateNumber, c.plateNumber),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 130,
+                child: Text(
+                  l10n.plateNumber,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              Expanded(
+                child: PlateLabel(
+                  plateNumber: c.plateNumber,
+                  country: c.plateCountry,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
         _row(context, l10n.company, view.companyName),
         _row(context, l10n.vehicleMake, view.vehicleLabel),
         _row(context, l10n.cargoType, view.cargoTypeName),
         if (c.cargoQuantity != null)
-          _row(context, l10n.cargoQuantity,
-              '${c.cargoQuantity} ${c.quantityUnit ?? ''}'.trim()),
+          _row(
+            context,
+            l10n.cargoQuantity,
+            '${c.cargoQuantity} ${c.quantityUnit ?? ''}'.trim(),
+          ),
         _row(context, l10n.crossedAt, df.format(c.crossedAt)),
         if (c.note != null && c.note!.isNotEmpty)
           _row(context, l10n.note, c.note!),
@@ -148,8 +176,10 @@ class _Body extends StatelessWidget {
         children: [
           SizedBox(
             width: 130,
-            child: Text(label,
-                style: const TextStyle(fontWeight: FontWeight.w600)),
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
           ),
           Expanded(child: Text(value)),
         ],
@@ -164,18 +194,64 @@ class _HistoryTile extends StatelessWidget {
   final ChangeHistoryData entry;
 
   String _fieldLabel(AppLocalizations l10n, String key) => switch (key) {
-        'plateNumber' => l10n.plateNumber,
-        'plateCountry' => l10n.plateCountry,
-        'company' => l10n.company,
-        'vehicle' => l10n.vehicleMake,
-        'cargoType' => l10n.cargoType,
-        'cargoQuantity' => l10n.cargoQuantity,
-        'quantityUnit' => l10n.quantityUnit,
-        'crossedAt' => l10n.crossedAt,
-        'note' => l10n.note,
-        'photos' => l10n.photos,
-        _ => key,
-      };
+    'plateNumber' => l10n.plateNumber,
+    'plateCountry' => l10n.plateCountry,
+    'company' => l10n.company,
+    'vehicle' => l10n.vehicleMake,
+    'cargoType' => l10n.cargoType,
+    'cargoQuantity' => l10n.cargoQuantity,
+    'quantityUnit' => l10n.quantityUnit,
+    'crossedAt' => l10n.crossedAt,
+    'note' => l10n.note,
+    'photos' => l10n.photos,
+    _ => key,
+  };
+
+  String _fieldValue(String key, Object? value) {
+    if (value == null) return '—';
+    if (key == 'crossedAt') {
+      final dt = DateTime.tryParse('$value');
+      if (dt != null) return DateFormat('dd.MM.yyyy HH:mm').format(dt);
+    }
+    return '$value';
+  }
+
+  Widget _value(String key, Object? value, String country) {
+    if (key == 'plateNumber' && value != null) {
+      return PlateLabel(plateNumber: '$value', country: country, flagWidth: 20);
+    }
+    return Text(_fieldValue(key, value));
+  }
+
+  /// One changed field: "label: from → to" (or just "label: to" on create).
+  Widget _changeRow(
+    BuildContext context,
+    AppLocalizations l10n,
+    String key,
+    Map<String, dynamic> change,
+    String country,
+  ) {
+    final from = change['from'];
+    final to = change['to'];
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Wrap(
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: 6,
+        children: [
+          Text(
+            '${_fieldLabel(l10n, key)}:',
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          if (from != null) ...[
+            _value(key, from, country),
+            const Icon(Icons.arrow_forward, size: 16),
+          ],
+          _value(key, to, country),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -197,19 +273,48 @@ class _HistoryTile extends StatelessWidget {
     try {
       snap = jsonDecode(entry.snapshotJson) as Map<String, dynamic>;
     } catch (_) {}
+    final country = (snap['plateCountry'] as String?) ?? 'uz';
+    final changes = (snap['changes'] as Map?)?.cast<String, dynamic>();
     return Card(
       child: ExpansionTile(
         leading: Icon(icon),
         title: Text(label),
         subtitle: Text(df.format(entry.changedAt)),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-        children: [
-          for (final e in snap.entries)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text('${_fieldLabel(l10n, e.key)}: ${e.value ?? '—'}'),
-            ),
-        ],
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        childrenPadding: const EdgeInsets.fromLTRB(2, 0, 2, 2),
+        children: changes != null
+            ? [
+                if (changes.isEmpty)
+                  const SizedBox.shrink()
+                else
+                  for (final e in changes.entries)
+                    _changeRow(
+                      context,
+                      l10n,
+                      e.key,
+                      (e.value as Map).cast<String, dynamic>(),
+                      country,
+                    ),
+              ]
+            : [
+                // Backward compatibility: old flat-snapshot entries.
+                for (final e in snap.entries)
+                  if (e.key != 'plateCountry')
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 3),
+                      child: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 6,
+                        children: [
+                          Text(
+                            '${_fieldLabel(l10n, e.key)}:',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          _value(e.key, e.value, country),
+                        ],
+                      ),
+                    ),
+              ],
       ),
     );
   }
