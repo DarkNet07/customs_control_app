@@ -61,6 +61,8 @@ class CrossingQueryController extends Notifier<CrossingQuery> {
   void setCompany(int? id) => state = state.copyWith(companyId: id);
   void setMake(int? id) => state = state.copyWith(makeId: id);
   void setCargoType(int? id) => state = state.copyWith(cargoTypeId: id);
+  void setRange(DateTime? from, DateTime? to) =>
+      state = state.copyWith(from: from, to: to);
   void reset() => state = const CrossingQuery();
 }
 

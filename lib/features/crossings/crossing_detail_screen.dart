@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import '../../core/db/app_database.dart';
 import '../../core/l10n/l10n.dart';
 import '../../core/providers.dart';
+import 'widgets/photo_viewer.dart';
 
 final _detailProvider =
     FutureProvider.family.autoDispose((ref, int id) async {
@@ -102,13 +103,20 @@ class _Body extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               itemCount: view.photos.length,
               separatorBuilder: (_, _) => const SizedBox(width: 8),
-              itemBuilder: (_, i) {
+              itemBuilder: (context, i) {
                 final f = File(view.photos[i].filePath);
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: f.existsSync()
-                      ? Image.file(f, fit: BoxFit.cover)
-                      : const SizedBox(width: 200),
+                return GestureDetector(
+                  onTap: () => PhotoViewerScreen.open(
+                    context,
+                    view.photos.map((p) => p.filePath).toList(),
+                    i,
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: f.existsSync()
+                        ? Image.file(f, fit: BoxFit.cover)
+                        : const SizedBox(width: 200),
+                  ),
                 );
               },
             ),
@@ -155,6 +163,20 @@ class _HistoryTile extends StatelessWidget {
 
   final ChangeHistoryData entry;
 
+  String _fieldLabel(AppLocalizations l10n, String key) => switch (key) {
+        'plateNumber' => l10n.plateNumber,
+        'plateCountry' => l10n.plateCountry,
+        'company' => l10n.company,
+        'vehicle' => l10n.vehicleMake,
+        'cargoType' => l10n.cargoType,
+        'cargoQuantity' => l10n.cargoQuantity,
+        'quantityUnit' => l10n.quantityUnit,
+        'crossedAt' => l10n.crossedAt,
+        'note' => l10n.note,
+        'photos' => l10n.photos,
+        _ => key,
+      };
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -185,7 +207,7 @@ class _HistoryTile extends StatelessWidget {
           for (final e in snap.entries)
             Align(
               alignment: Alignment.centerLeft,
-              child: Text('${e.key}: ${e.value}'),
+              child: Text('${_fieldLabel(l10n, e.key)}: ${e.value ?? '—'}'),
             ),
         ],
       ),

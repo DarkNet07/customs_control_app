@@ -36,6 +36,37 @@ class SearchSortBar extends ConsumerWidget {
               onChanged: controller.setSearch,
             ),
           ),
+          IconButton(
+            tooltip: l10n.exportPeriod,
+            isSelected: query.from != null || query.to != null,
+            icon: Icon(query.from != null || query.to != null
+                ? Icons.event_available
+                : Icons.date_range),
+            onPressed: () async {
+              final now = DateTime.now();
+              final picked = await showDateRangePicker(
+                context: context,
+                firstDate: DateTime(2020),
+                lastDate: DateTime(now.year + 1),
+                initialDateRange: query.from != null && query.to != null
+                    ? DateTimeRange(start: query.from!, end: query.to!)
+                    : null,
+              );
+              if (picked == null) return;
+              controller.setRange(
+                DateTime(picked.start.year, picked.start.month,
+                    picked.start.day),
+                DateTime(picked.end.year, picked.end.month, picked.end.day,
+                    23, 59, 59),
+              );
+            },
+          ),
+          if (query.from != null || query.to != null)
+            IconButton(
+              tooltip: l10n.cancel,
+              icon: const Icon(Icons.event_busy),
+              onPressed: () => controller.setRange(null, null),
+            ),
           PopupMenuButton<CrossingSort>(
             icon: const Icon(Icons.sort),
             tooltip: l10n.sort,

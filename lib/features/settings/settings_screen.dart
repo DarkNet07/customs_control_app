@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/l10n/l10n.dart';
 import '../../core/providers.dart';
+import '../../core/widgets/flag_icon.dart';
 import '../../core/widgets/text_input_dialog.dart';
 import '../auth/pin_dialog.dart';
 
@@ -54,9 +55,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: const Column(
               children: [
                 RadioListTile<String>(
-                    value: 'ru', title: Text('Русский')),
+                  value: 'ru',
+                  title: Text('Русский'),
+                  secondary: FlagIcon('ru'),
+                ),
                 RadioListTile<String>(
-                    value: 'tg', title: Text('Тоҷикӣ')),
+                  value: 'tg',
+                  title: Text('Тоҷикӣ'),
+                  secondary: FlagIcon('tj'),
+                ),
               ],
             ),
           ),

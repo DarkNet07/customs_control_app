@@ -9,6 +9,7 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import '../../core/auth/lock_controller.dart';
 import '../../core/images/image_service.dart';
 import '../../core/l10n/l10n.dart';
+import '../../core/widgets/flag_icon.dart';
 import '../../core/plate/plate_formats.dart';
 import '../../core/providers.dart';
 import '../../core/widgets/text_input_dialog.dart';
@@ -278,8 +279,16 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
             Expanded(
               child: SegmentedButton<String>(
                 segments: [
-                  ButtonSegment(value: 'uz', label: Text(l10n.uzbekistan)),
-                  ButtonSegment(value: 'tj', label: Text(l10n.tajikistan)),
+                  ButtonSegment(
+                    value: 'uz',
+                    label: Text(l10n.uzbekistan),
+                    icon: const FlagIcon('uz', width: 24),
+                  ),
+                  ButtonSegment(
+                    value: 'tj',
+                    label: Text(l10n.tajikistan),
+                    icon: const FlagIcon('tj', width: 24),
+                  ),
                 ],
                 selected: {_country},
                 onSelectionChanged: (s) => _onCountryChanged(s.first),

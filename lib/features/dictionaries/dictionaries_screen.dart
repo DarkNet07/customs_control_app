@@ -41,6 +41,7 @@ class _MakesTab extends ConsumerWidget {
     final dict = ref.read(dictionaryRepositoryProvider);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_makes',
         onPressed: () async {
           final name =
               await showTextInputDialog(context, title: l10n.addMakeTitle);
@@ -115,6 +116,7 @@ class _CargoTab extends ConsumerWidget {
     final dict = ref.read(dictionaryRepositoryProvider);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_cargo',
         onPressed: () async {
           final name = await showTextInputDialog(context,
               title: l10n.addCargoTypeTitle);

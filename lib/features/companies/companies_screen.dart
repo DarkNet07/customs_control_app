@@ -17,6 +17,7 @@ class CompaniesScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.companies)),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_companies',
         onPressed: () async {
           final name =
               await showTextInputDialog(context, title: l10n.addCompanyTitle);

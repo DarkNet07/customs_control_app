@@ -17,6 +17,7 @@ class ScaffoldWithNav extends StatelessWidget {
       body: navigationShell,
       floatingActionButton: showFab
           ? FloatingActionButton(
+              heroTag: 'fab_main',
               onPressed: () => context.push('/crossing/new'),
               child: const Icon(Icons.add),
             )
