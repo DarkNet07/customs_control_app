@@ -25,15 +25,16 @@ Future<void> render(String svgPath, String pngPath, int size) async {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('generate branding PNGs', () async {
+  test('generate adaptive foreground PNG', () async {
+    // app_icon.png is produced by padding the provided artwork (see README);
+    // here we only rasterize the transparent adaptive foreground.
     const dir = 'assets/branding';
-    await render('$dir/app_icon.svg', '$dir/app_icon.png', 1024);
     await render(
         '$dir/app_icon_foreground.svg', '$dir/app_icon_foreground.png', 1024);
-    expect(File('$dir/app_icon.png').existsSync(), isTrue);
     expect(File('$dir/app_icon_foreground.png').existsSync(), isTrue);
     // Sanity: PNG magic header.
-    final header = await File('$dir/app_icon.png').openRead(0, 8).first;
+    final header =
+        await File('$dir/app_icon_foreground.png').openRead(0, 8).first;
     expect(header.sublist(0, 4), <int>[0x89, 0x50, 0x4E, 0x47]);
   });
 }

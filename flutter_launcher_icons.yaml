@@ -4,6 +4,6 @@ flutter_launcher_icons:
   image_path: "assets/branding/app_icon.png"
   min_sdk_android: 21
   remove_alpha_ios: true
-  background_color_ios: "#F8C100"
-  adaptive_icon_background: "#F8C100"
+  background_color_ios: "#FCD106"
+  adaptive_icon_background: "#FCD106"
   adaptive_icon_foreground: "assets/branding/app_icon_foreground.png"

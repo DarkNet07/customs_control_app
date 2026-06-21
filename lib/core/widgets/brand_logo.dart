@@ -10,9 +10,8 @@ class BrandLogo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SvgPicture.asset(
-      'assets/branding/logo.svg',
+      'assets/branding/customs_control_icon.svg',
       width: size,
-      height: size,
       semanticsLabel: 'Customs Control',
     );
   }
