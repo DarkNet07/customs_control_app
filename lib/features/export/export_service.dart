@@ -4,6 +4,7 @@ import 'package:excel/excel.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
@@ -47,7 +48,19 @@ class ExportService {
   }
 
   Future<File> exportPdf(List<CrossingView> data) async {
-    final doc = pw.Document();
+    // The built-in PDF fonts (Helvetica) lack Cyrillic glyphs, so Russian text
+    // renders as boxes. Use the bundled Roboto (has Cyrillic) — loaded from
+    // assets, no network needed.
+    pw.ThemeData? theme;
+    try {
+      theme = pw.ThemeData.withFont(
+        base: pw.Font.ttf(await rootBundle.load('assets/fonts/Roboto-Regular.ttf')),
+        bold: pw.Font.ttf(await rootBundle.load('assets/fonts/Roboto-Bold.ttf')),
+      );
+    } catch (_) {
+      theme = null;
+    }
+    final doc = pw.Document(theme: theme);
     doc.addPage(
       pw.MultiPage(
         build: (_) => [

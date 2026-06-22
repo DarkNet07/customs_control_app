@@ -775,6 +775,12 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Грузы'**
   String get cargoList;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In ru, this message translates to:
+  /// **'Настройки'**
+  String get openSettings;
 }
 
 class _AppLocalizationsDelegate

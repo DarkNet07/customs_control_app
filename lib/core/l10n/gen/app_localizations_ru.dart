@@ -348,4 +348,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get cargoList => 'Грузы';
+
+  @override
+  String get openSettings => 'Настройки';
 }

@@ -348,4 +348,7 @@ class AppLocalizationsTg extends AppLocalizations {
 
   @override
   String get cargoList => 'Борҳо';
+
+  @override
+  String get openSettings => 'Танзимот';
 }

@@ -9,6 +9,7 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import '../../core/auth/lock_controller.dart';
 import '../../core/images/image_service.dart';
 import '../../core/l10n/l10n.dart';
+import '../../core/location/location_service.dart';
 import '../../core/widgets/flag_icon.dart';
 import '../../core/plate/plate_formats.dart';
 import '../../core/providers.dart';
@@ -168,20 +169,43 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
   Future<void> _captureLocation() async {
     if (_locating) return;
     setState(() => _locating = true);
+    final service = ref.read(locationServiceProvider);
     final lock = ref.read(lockProvider.notifier);
     lock.suspendAutoLock(); // permission dialog backgrounds the app
     try {
-      final point = await ref.read(locationServiceProvider).current();
-      if (point != null && mounted) {
+      final result = await service.current();
+      if (!mounted) return;
+      if (result.point != null) {
         setState(() {
-          _lat = point.lat;
-          _lng = point.lng;
+          _lat = result.point!.lat;
+          _lng = result.point!.lng;
         });
+      } else if (result.status == LocationStatus.deniedForever) {
+        _showLocationHint(
+          context.l10n.locationUnavailable,
+          context.l10n.openSettings,
+          service.openAppSettings,
+        );
+      } else if (result.status == LocationStatus.serviceDisabled) {
+        _showLocationHint(
+          context.l10n.locationUnavailable,
+          context.l10n.openSettings,
+          service.openLocationSettings,
+        );
       }
     } finally {
       lock.resumeAutoLock();
       if (mounted) setState(() => _locating = false);
     }
+  }
+
+  void _showLocationHint(String message, String action, VoidCallback onAction) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        action: SnackBarAction(label: action, onPressed: onAction),
+      ),
+    );
   }
 
   Future<void> _pickDateTime() async {

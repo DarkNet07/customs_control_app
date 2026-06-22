@@ -112,5 +112,6 @@
   "noPlateToggle": "Нет гос. номера",
   "noPlateNumber": "Без номера",
   "addCargo": "Добавить груз",
-  "cargoList": "Грузы"
+  "cargoList": "Грузы",
+  "openSettings": "Настройки"
 }
