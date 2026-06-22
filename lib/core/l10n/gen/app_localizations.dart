@@ -751,6 +751,30 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Очистить'**
   String get clear;
+
+  /// No description provided for @noPlateToggle.
+  ///
+  /// In ru, this message translates to:
+  /// **'Нет гос. номера'**
+  String get noPlateToggle;
+
+  /// No description provided for @noPlateNumber.
+  ///
+  /// In ru, this message translates to:
+  /// **'Без номера'**
+  String get noPlateNumber;
+
+  /// No description provided for @addCargo.
+  ///
+  /// In ru, this message translates to:
+  /// **'Добавить груз'**
+  String get addCargo;
+
+  /// No description provided for @cargoList.
+  ///
+  /// In ru, this message translates to:
+  /// **'Грузы'**
+  String get cargoList;
 }
 
 class _AppLocalizationsDelegate

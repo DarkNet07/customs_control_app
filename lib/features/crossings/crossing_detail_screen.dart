@@ -140,27 +140,26 @@ class _Body extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: PlateLabel(
-                  plateNumber: c.plateNumber,
-                  country: c.plateCountry,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                ),
+                child: view.hasPlate
+                    ? PlateLabel(
+                        plateNumber: c.plateNumber!,
+                        country: c.plateCountry!,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
+                      )
+                    : Text(
+                        l10n.noPlateNumber,
+                        style: const TextStyle(fontStyle: FontStyle.italic),
+                      ),
               ),
             ],
           ),
         ),
         _row(context, l10n.company, view.companyName),
         _row(context, l10n.vehicleMake, view.vehicleLabel),
-        _row(context, l10n.cargoType, view.cargoTypeName),
-        if (c.cargoQuantity != null)
-          _row(
-            context,
-            l10n.cargoQuantity,
-            '${c.cargoQuantity} ${c.quantityUnit ?? ''}'.trim(),
-          ),
+        _cargoRows(context, l10n),
         _row(context, l10n.crossedAt, df.format(c.crossedAt)),
         if (c.note != null && c.note!.isNotEmpty)
           _row(context, l10n.note, c.note!),
@@ -173,6 +172,33 @@ class _Body extends StatelessWidget {
         const SizedBox(height: 8),
         for (final h in history) _HistoryTile(entry: h),
       ],
+    );
+  }
+
+  Widget _cargoRows(BuildContext context, AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 130,
+            child: Text(l10n.cargoList,
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final cg in view.cargos)
+                  Text(cg.quantityLabel.isEmpty
+                      ? cg.cargoTypeName
+                      : '${cg.cargoTypeName} — ${cg.quantityLabel}'),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -266,6 +292,7 @@ class _HistoryTile extends StatelessWidget {
     'plateCountry' => l10n.plateCountry,
     'company' => l10n.company,
     'vehicle' => l10n.vehicleMake,
+    'cargo' => l10n.cargoList,
     'cargoType' => l10n.cargoType,
     'cargoQuantity' => l10n.cargoQuantity,
     'quantityUnit' => l10n.quantityUnit,

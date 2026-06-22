@@ -48,7 +48,9 @@ class _Content extends StatelessWidget {
     final byCargo = <String, int>{};
     for (final v in list) {
       byCompany[v.companyName] = (byCompany[v.companyName] ?? 0) + 1;
-      byCargo[v.cargoTypeName] = (byCargo[v.cargoTypeName] ?? 0) + 1;
+      for (final cg in v.cargos) {
+        byCargo[cg.cargoTypeName] = (byCargo[cg.cargoTypeName] ?? 0) + 1;
+      }
     }
     final topCompanies = byCompany.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));

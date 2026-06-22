@@ -108,5 +108,9 @@
   "locationUnavailable": "Ҷойгиршавӣ муайян нашуд",
   "coordinates": "Координатаҳо",
   "openInMaps": "Кушодан дар харита",
-  "clear": "Тоза кардан"
+  "clear": "Тоза кардан",
+  "noPlateToggle": "Рақам надорад",
+  "noPlateNumber": "Бе рақам",
+  "addCargo": "Илова кардани бор",
+  "cargoList": "Борҳо"
 }

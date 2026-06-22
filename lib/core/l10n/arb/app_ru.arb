@@ -108,5 +108,9 @@
   "locationUnavailable": "Местоположение не определено",
   "coordinates": "Координаты",
   "openInMaps": "Открыть в картах",
-  "clear": "Очистить"
+  "clear": "Очистить",
+  "noPlateToggle": "Нет гос. номера",
+  "noPlateNumber": "Без номера",
+  "addCargo": "Добавить груз",
+  "cargoList": "Грузы"
 }

@@ -13,19 +13,21 @@ class ExportService {
   final _df = DateFormat('dd.MM.yyyy HH:mm');
 
   List<String> _headers() =>
-      ['Дата/Время', 'Гос.номер', 'Компания', 'Авто', 'Тип груза', 'Кол-во', 'Заметка'];
+      ['Дата/Время', 'Гос.номер', 'Компания', 'Авто', 'Грузы', 'Заметка'];
 
   List<String> _rowOf(CrossingView v) {
     final c = v.crossing;
+    final cargo = v.cargos
+        .map((cg) => cg.quantityLabel.isEmpty
+            ? cg.cargoTypeName
+            : '${cg.cargoTypeName} (${cg.quantityLabel})')
+        .join(', ');
     return [
       _df.format(c.crossedAt),
-      c.plateNumber,
+      c.plateNumber ?? 'Без номера',
       v.companyName,
       v.vehicleLabel,
-      v.cargoTypeName,
-      c.cargoQuantity == null
-          ? ''
-          : '${c.cargoQuantity} ${c.quantityUnit ?? ''}'.trim(),
+      cargo,
       c.note ?? '',
     ];
   }

@@ -107,9 +107,17 @@ class _CompanyTree extends StatelessWidget {
   List<Widget> _subGroups(BuildContext context, List<CrossingView> list) {
     final sub = <String, List<CrossingView>>{};
     for (final v in list) {
-      final key =
-          groupMode == GroupMode.byVehicle ? v.vehicleLabel : v.cargoTypeName;
-      sub.putIfAbsent(key, () => []).add(v);
+      if (groupMode == GroupMode.byVehicle) {
+        sub.putIfAbsent(v.vehicleLabel, () => []).add(v);
+      } else {
+        // A record with several cargo types appears under each of its types.
+        final names = v.cargos.isEmpty
+            ? <String>['—']
+            : {for (final cg in v.cargos) cg.cargoTypeName}.toList();
+        for (final name in names) {
+          sub.putIfAbsent(name, () => []).add(v);
+        }
+      }
     }
     final keys = sub.keys.toList()..sort();
     return [

@@ -14,6 +14,22 @@ import '../../core/plate/plate_formats.dart';
 import '../../core/providers.dart';
 import '../../core/widgets/text_input_dialog.dart';
 
+/// Mutable state for one cargo line in the form.
+class _CargoEntry {
+  _CargoEntry({this.cargoTypeId, String quantity = '', String unit = ''})
+      : qty = TextEditingController(text: quantity),
+        unit = TextEditingController(text: unit);
+
+  int? cargoTypeId;
+  final TextEditingController qty;
+  final TextEditingController unit;
+
+  void dispose() {
+    qty.dispose();
+    unit.dispose();
+  }
+}
+
 class CrossingFormScreen extends ConsumerStatefulWidget {
   const CrossingFormScreen({super.key, this.id});
 
@@ -26,10 +42,9 @@ class CrossingFormScreen extends ConsumerStatefulWidget {
 class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
   final _formKey = GlobalKey<FormState>();
   final _plateController = TextEditingController();
-  final _quantityController = TextEditingController();
-  final _unitController = TextEditingController();
   final _noteController = TextEditingController();
 
+  bool _noPlate = false;
   String _country = 'uz';
   late PlateFormat _format = PlateFormats.forCountry('uz').first;
   late MaskTextInputFormatter _maskFormatter = _format.buildFormatter();
@@ -37,7 +52,7 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
   int? _companyId;
   int? _makeId;
   int? _modelId;
-  int? _cargoTypeId;
+  final List<_CargoEntry> _cargos = [_CargoEntry()];
   DateTime _crossedAt = DateTime.now();
   final List<StoredPhoto> _photos = [];
   double? _lat;
@@ -66,19 +81,29 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
       return;
     }
     final c = view.crossing;
-    _country = c.plateCountry;
-    _format = PlateFormats.byKey(c.plateFormatKey);
+    _noPlate = c.plateNumber == null;
+    _country = c.plateCountry ?? 'uz';
+    _format = PlateFormats.byKey(c.plateFormatKey ?? PlateFormats.all.first.key);
     _maskFormatter = _format.buildFormatter();
-    _plateController.text = c.plateNumber;
+    _plateController.text = c.plateNumber ?? '';
     _companyId = c.companyId;
     _makeId = c.makeId;
     _modelId = c.modelId;
-    _cargoTypeId = c.cargoTypeId;
     _crossedAt = c.crossedAt;
     _lat = c.latitude;
     _lng = c.longitude;
-    _quantityController.text = c.cargoQuantity?.toString() ?? '';
-    _unitController.text = c.quantityUnit ?? '';
+    if (view.cargos.isNotEmpty) {
+      for (final e in _cargos) {
+        e.dispose();
+      }
+      _cargos
+        ..clear()
+        ..addAll(view.cargos.map((cg) => _CargoEntry(
+              cargoTypeId: cg.cargoTypeId,
+              quantity: _numStr(cg.quantity),
+              unit: cg.unit ?? '',
+            )));
+    }
     _noteController.text = c.note ?? '';
     for (final p in view.photos) {
       _photos.add((filePath: p.filePath, thumbPath: p.thumbPath));
@@ -86,12 +111,18 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
     setState(() => _loading = false);
   }
 
+  static String _numStr(double? v) {
+    if (v == null) return '';
+    return v == v.roundToDouble() ? v.toStringAsFixed(0) : '$v';
+  }
+
   @override
   void dispose() {
     _plateController.dispose();
-    _quantityController.dispose();
-    _unitController.dispose();
     _noteController.dispose();
+    for (final e in _cargos) {
+      e.dispose();
+    }
     super.dispose();
   }
 
@@ -180,7 +211,16 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
   Future<void> _save() async {
     final l10n = context.l10n;
     if (!_formKey.currentState!.validate()) return;
-    if (_companyId == null || _makeId == null || _cargoTypeId == null) {
+    final cargos = [
+      for (final e in _cargos)
+        if (e.cargoTypeId != null)
+          CargoInput(
+            cargoTypeId: e.cargoTypeId!,
+            quantity: double.tryParse(e.qty.text.replaceAll(',', '.')),
+            unit: e.unit.text.trim().isEmpty ? null : e.unit.text.trim(),
+          ),
+    ];
+    if (_companyId == null || _makeId == null || cargos.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.fieldRequired)));
@@ -188,19 +228,13 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
     }
     final input = CrossingInput(
       companyId: _companyId!,
-      plateNumber: _plateController.text,
-      plateCountry: _country,
-      plateFormatKey: _format.key,
+      plateNumber: _noPlate ? null : _plateController.text,
+      plateCountry: _noPlate ? null : _country,
+      plateFormatKey: _noPlate ? null : _format.key,
       makeId: _makeId!,
       modelId: _modelId,
-      cargoTypeId: _cargoTypeId!,
+      cargos: cargos,
       crossedAt: _crossedAt,
-      cargoQuantity: double.tryParse(
-        _quantityController.text.replaceAll(',', '.'),
-      ),
-      quantityUnit: _unitController.text.trim().isEmpty
-          ? null
-          : _unitController.text.trim(),
       note: _noteController.text.trim().isEmpty
           ? null
           : _noteController.text.trim(),
@@ -241,9 +275,7 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
             const SizedBox(height: 16),
             _modelField(l10n),
             const SizedBox(height: 16),
-            _cargoTypeField(l10n),
-            const SizedBox(height: 16),
-            _quantityRow(l10n),
+            _cargoSection(l10n),
             const SizedBox(height: 16),
             _dateField(l10n),
             const SizedBox(height: 16),
@@ -318,6 +350,15 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.noPlateToggle),
+          value: _noPlate,
+          onChanged: (v) => setState(() => _noPlate = v),
+        ),
+        if (_noPlate)
+          const SizedBox.shrink()
+        else ...[
         Row(
           children: [
             Expanded(
@@ -392,6 +433,7 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
             return null;
           },
         ),
+        ],
       ],
     );
   }
@@ -507,81 +549,120 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
     );
   }
 
-  Widget _cargoTypeField(AppLocalizations l10n) {
-    final cargo = ref.watch(cargoTypesProvider);
-    return cargo.when(
-      loading: () => const LinearProgressIndicator(),
-      error: (e, _) => Text('$e'),
-      data: (list) {
-        final selected = list.any((c) => c.id == _cargoTypeId)
-            ? _cargoTypeId
-            : null;
-        return Row(
-          children: [
-            Expanded(
-              child: DropdownButtonFormField<int>(
-                key: ValueKey('cargo-$selected'),
-                initialValue: selected,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  labelText: l10n.cargoType,
-                  border: const OutlineInputBorder(),
-                ),
-                items: [
-                  for (final c in list)
-                    DropdownMenuItem(value: c.id, child: Text(c.name)),
-                ],
-                onChanged: (v) => setState(() => _cargoTypeId = v),
-                validator: (v) => v == null ? l10n.fieldRequired : null,
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.add_circle_outline),
-              tooltip: l10n.addCargoTypeTitle,
-              onPressed: () async {
-                final name = await showTextInputDialog(
-                  context,
-                  title: l10n.addCargoTypeTitle,
-                );
-                if (name == null) return;
-                final id = await ref
-                    .read(dictionaryRepositoryProvider)
-                    .addCargoType(name);
-                setState(() => _cargoTypeId = id);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _quantityRow(AppLocalizations l10n) {
-    return Row(
+  Widget _cargoSection(AppLocalizations l10n) {
+    final cargoTypes = ref.watch(cargoTypesProvider);
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          flex: 2,
-          child: TextFormField(
-            controller: _quantityController,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(
-              labelText: '${l10n.cargoQuantity} (${l10n.optional})',
-              border: const OutlineInputBorder(),
-            ),
+        Text(l10n.cargoList, style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        cargoTypes.when(
+          loading: () => const LinearProgressIndicator(),
+          error: (e, _) => Text('$e'),
+          data: (list) => Column(
+            children: [
+              for (var i = 0; i < _cargos.length; i++)
+                _cargoEntryRow(l10n, list, i),
+            ],
           ),
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: TextFormField(
-            controller: _unitController,
-            decoration: InputDecoration(
-              labelText: l10n.quantityUnit,
-              border: const OutlineInputBorder(),
-            ),
+        const SizedBox(height: 4),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            icon: const Icon(Icons.add),
+            label: Text(l10n.addCargo),
+            onPressed: () => setState(() => _cargos.add(_CargoEntry())),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _cargoEntryRow(AppLocalizations l10n, List list, int index) {
+    final entry = _cargos[index];
+    final selected =
+        list.any((c) => c.id == entry.cargoTypeId) ? entry.cargoTypeId : null;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<int>(
+                  key: ValueKey('cargo-$index-$selected'),
+                  initialValue: selected,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    labelText: l10n.cargoType,
+                    border: const OutlineInputBorder(),
+                  ),
+                  items: [
+                    for (final c in list)
+                      DropdownMenuItem(value: c.id, child: Text(c.name)),
+                  ],
+                  onChanged: (v) => setState(() => entry.cargoTypeId = v),
+                  validator: (v) => v == null ? l10n.fieldRequired : null,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add_circle_outline),
+                tooltip: l10n.addCargoTypeTitle,
+                onPressed: () async {
+                  final name = await showTextInputDialog(
+                    context,
+                    title: l10n.addCargoTypeTitle,
+                  );
+                  if (name == null) return;
+                  final id = await ref
+                      .read(dictionaryRepositoryProvider)
+                      .addCargoType(name);
+                  setState(() => entry.cargoTypeId = id);
+                },
+              ),
+              if (_cargos.length > 1)
+                IconButton(
+                  icon: const Icon(Icons.delete_outline),
+                  tooltip: l10n.delete,
+                  onPressed: () => setState(() {
+                    _cargos.removeAt(index).dispose();
+                  }),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 2,
+                child: TextFormField(
+                  controller: entry.qty,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: '${l10n.cargoQuantity} (${l10n.optional})',
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextFormField(
+                  controller: entry.unit,
+                  decoration: InputDecoration(
+                    labelText: l10n.quantityUnit,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

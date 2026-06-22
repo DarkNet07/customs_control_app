@@ -46,14 +46,12 @@ class Crossings extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get uuid => text()();
   IntColumn get companyId => integer().references(Companies, #id)();
-  TextColumn get plateNumber => text().withLength(min: 1, max: 40)();
-  TextColumn get plateCountry => text()(); // uz | tj
-  TextColumn get plateFormatKey => text()();
+  // Plate is optional: some vehicles have no registration plate.
+  TextColumn get plateNumber => text().nullable()();
+  TextColumn get plateCountry => text().nullable()(); // uz | tj
+  TextColumn get plateFormatKey => text().nullable()();
   IntColumn get makeId => integer().references(VehicleMakes, #id)();
   IntColumn get modelId => integer().references(VehicleModels, #id).nullable()();
-  IntColumn get cargoTypeId => integer().references(CargoTypes, #id)();
-  RealColumn get cargoQuantity => real().nullable()();
-  TextColumn get quantityUnit => text().nullable()();
   DateTimeColumn get crossedAt => dateTime()();
   RealColumn get latitude => real().nullable()();
   RealColumn get longitude => real().nullable()();
@@ -63,6 +61,19 @@ class Crossings extends Table {
   IntColumn get serverId => integer().nullable()();
   TextColumn get syncStatus => text().withDefault(const Constant('local'))();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+}
+
+/// Cargo lines of a crossing — a crossing may carry several cargo types,
+/// each with its own optional quantity and unit.
+class CrossingCargos extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get uuid => text()();
+  IntColumn get crossingId =>
+      integer().references(Crossings, #id, onDelete: KeyAction.cascade)();
+  IntColumn get cargoTypeId => integer().references(CargoTypes, #id)();
+  RealColumn get quantity => real().nullable()();
+  TextColumn get unit => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
 }
 
 /// Photos attached to a crossing (paths, not bytes).

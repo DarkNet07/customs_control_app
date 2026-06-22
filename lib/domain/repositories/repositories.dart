@@ -2,19 +2,26 @@ import '../../core/db/app_database.dart';
 import '../models/crossing_view.dart';
 import '../models/query_options.dart';
 
+/// One cargo line to save with a crossing.
+class CargoInput {
+  CargoInput({required this.cargoTypeId, this.quantity, this.unit});
+
+  final int cargoTypeId;
+  final double? quantity;
+  final String? unit;
+}
+
 /// Data needed to create or update a crossing.
 class CrossingInput {
   CrossingInput({
     required this.companyId,
-    required this.plateNumber,
-    required this.plateCountry,
-    required this.plateFormatKey,
     required this.makeId,
     required this.modelId,
-    required this.cargoTypeId,
     required this.crossedAt,
-    this.cargoQuantity,
-    this.quantityUnit,
+    required this.cargos,
+    this.plateNumber,
+    this.plateCountry,
+    this.plateFormatKey,
     this.note,
     this.latitude,
     this.longitude,
@@ -22,15 +29,13 @@ class CrossingInput {
   });
 
   final int companyId;
-  final String plateNumber;
-  final String plateCountry;
-  final String plateFormatKey;
+  final String? plateNumber;
+  final String? plateCountry;
+  final String? plateFormatKey;
   final int makeId;
   final int? modelId;
-  final int cargoTypeId;
   final DateTime crossedAt;
-  final double? cargoQuantity;
-  final String? quantityUnit;
+  final List<CargoInput> cargos;
   final String? note;
   final double? latitude;
   final double? longitude;

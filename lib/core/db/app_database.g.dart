@@ -1654,13 +1654,9 @@ class $CrossingsTable extends Crossings
   late final GeneratedColumn<String> plateNumber = GeneratedColumn<String>(
     'plate_number',
     aliasedName,
-    false,
-    additionalChecks: GeneratedColumn.checkTextLength(
-      minTextLength: 1,
-      maxTextLength: 40,
-    ),
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _plateCountryMeta = const VerificationMeta(
     'plateCountry',
@@ -1669,9 +1665,9 @@ class $CrossingsTable extends Crossings
   late final GeneratedColumn<String> plateCountry = GeneratedColumn<String>(
     'plate_country',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _plateFormatKeyMeta = const VerificationMeta(
     'plateFormatKey',
@@ -1680,9 +1676,9 @@ class $CrossingsTable extends Crossings
   late final GeneratedColumn<String> plateFormatKey = GeneratedColumn<String>(
     'plate_format_key',
     aliasedName,
-    false,
+    true,
     type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _makeIdMeta = const VerificationMeta('makeId');
   @override
@@ -1709,42 +1705,6 @@ class $CrossingsTable extends Crossings
     defaultConstraints: GeneratedColumn.constraintIsAlways(
       'REFERENCES vehicle_models (id)',
     ),
-  );
-  static const VerificationMeta _cargoTypeIdMeta = const VerificationMeta(
-    'cargoTypeId',
-  );
-  @override
-  late final GeneratedColumn<int> cargoTypeId = GeneratedColumn<int>(
-    'cargo_type_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-    defaultConstraints: GeneratedColumn.constraintIsAlways(
-      'REFERENCES cargo_types (id)',
-    ),
-  );
-  static const VerificationMeta _cargoQuantityMeta = const VerificationMeta(
-    'cargoQuantity',
-  );
-  @override
-  late final GeneratedColumn<double> cargoQuantity = GeneratedColumn<double>(
-    'cargo_quantity',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _quantityUnitMeta = const VerificationMeta(
-    'quantityUnit',
-  );
-  @override
-  late final GeneratedColumn<String> quantityUnit = GeneratedColumn<String>(
-    'quantity_unit',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
   );
   static const VerificationMeta _crossedAtMeta = const VerificationMeta(
     'crossedAt',
@@ -1858,9 +1818,6 @@ class $CrossingsTable extends Crossings
     plateFormatKey,
     makeId,
     modelId,
-    cargoTypeId,
-    cargoQuantity,
-    quantityUnit,
     crossedAt,
     latitude,
     longitude,
@@ -1910,8 +1867,6 @@ class $CrossingsTable extends Crossings
           _plateNumberMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_plateNumberMeta);
     }
     if (data.containsKey('plate_country')) {
       context.handle(
@@ -1921,8 +1876,6 @@ class $CrossingsTable extends Crossings
           _plateCountryMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_plateCountryMeta);
     }
     if (data.containsKey('plate_format_key')) {
       context.handle(
@@ -1932,8 +1885,6 @@ class $CrossingsTable extends Crossings
           _plateFormatKeyMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_plateFormatKeyMeta);
     }
     if (data.containsKey('make_id')) {
       context.handle(
@@ -1947,35 +1898,6 @@ class $CrossingsTable extends Crossings
       context.handle(
         _modelIdMeta,
         modelId.isAcceptableOrUnknown(data['model_id']!, _modelIdMeta),
-      );
-    }
-    if (data.containsKey('cargo_type_id')) {
-      context.handle(
-        _cargoTypeIdMeta,
-        cargoTypeId.isAcceptableOrUnknown(
-          data['cargo_type_id']!,
-          _cargoTypeIdMeta,
-        ),
-      );
-    } else if (isInserting) {
-      context.missing(_cargoTypeIdMeta);
-    }
-    if (data.containsKey('cargo_quantity')) {
-      context.handle(
-        _cargoQuantityMeta,
-        cargoQuantity.isAcceptableOrUnknown(
-          data['cargo_quantity']!,
-          _cargoQuantityMeta,
-        ),
-      );
-    }
-    if (data.containsKey('quantity_unit')) {
-      context.handle(
-        _quantityUnitMeta,
-        quantityUnit.isAcceptableOrUnknown(
-          data['quantity_unit']!,
-          _quantityUnitMeta,
-        ),
       );
     }
     if (data.containsKey('crossed_at')) {
@@ -2062,15 +1984,15 @@ class $CrossingsTable extends Crossings
       plateNumber: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}plate_number'],
-      )!,
+      ),
       plateCountry: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}plate_country'],
-      )!,
+      ),
       plateFormatKey: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}plate_format_key'],
-      )!,
+      ),
       makeId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}make_id'],
@@ -2078,18 +2000,6 @@ class $CrossingsTable extends Crossings
       modelId: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}model_id'],
-      ),
-      cargoTypeId: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}cargo_type_id'],
-      )!,
-      cargoQuantity: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}cargo_quantity'],
-      ),
-      quantityUnit: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}quantity_unit'],
       ),
       crossedAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
@@ -2140,14 +2050,11 @@ class Crossing extends DataClass implements Insertable<Crossing> {
   final int id;
   final String uuid;
   final int companyId;
-  final String plateNumber;
-  final String plateCountry;
-  final String plateFormatKey;
+  final String? plateNumber;
+  final String? plateCountry;
+  final String? plateFormatKey;
   final int makeId;
   final int? modelId;
-  final int cargoTypeId;
-  final double? cargoQuantity;
-  final String? quantityUnit;
   final DateTime crossedAt;
   final double? latitude;
   final double? longitude;
@@ -2161,14 +2068,11 @@ class Crossing extends DataClass implements Insertable<Crossing> {
     required this.id,
     required this.uuid,
     required this.companyId,
-    required this.plateNumber,
-    required this.plateCountry,
-    required this.plateFormatKey,
+    this.plateNumber,
+    this.plateCountry,
+    this.plateFormatKey,
     required this.makeId,
     this.modelId,
-    required this.cargoTypeId,
-    this.cargoQuantity,
-    this.quantityUnit,
     required this.crossedAt,
     this.latitude,
     this.longitude,
@@ -2185,19 +2089,18 @@ class Crossing extends DataClass implements Insertable<Crossing> {
     map['id'] = Variable<int>(id);
     map['uuid'] = Variable<String>(uuid);
     map['company_id'] = Variable<int>(companyId);
-    map['plate_number'] = Variable<String>(plateNumber);
-    map['plate_country'] = Variable<String>(plateCountry);
-    map['plate_format_key'] = Variable<String>(plateFormatKey);
+    if (!nullToAbsent || plateNumber != null) {
+      map['plate_number'] = Variable<String>(plateNumber);
+    }
+    if (!nullToAbsent || plateCountry != null) {
+      map['plate_country'] = Variable<String>(plateCountry);
+    }
+    if (!nullToAbsent || plateFormatKey != null) {
+      map['plate_format_key'] = Variable<String>(plateFormatKey);
+    }
     map['make_id'] = Variable<int>(makeId);
     if (!nullToAbsent || modelId != null) {
       map['model_id'] = Variable<int>(modelId);
-    }
-    map['cargo_type_id'] = Variable<int>(cargoTypeId);
-    if (!nullToAbsent || cargoQuantity != null) {
-      map['cargo_quantity'] = Variable<double>(cargoQuantity);
-    }
-    if (!nullToAbsent || quantityUnit != null) {
-      map['quantity_unit'] = Variable<String>(quantityUnit);
     }
     map['crossed_at'] = Variable<DateTime>(crossedAt);
     if (!nullToAbsent || latitude != null) {
@@ -2224,20 +2127,19 @@ class Crossing extends DataClass implements Insertable<Crossing> {
       id: Value(id),
       uuid: Value(uuid),
       companyId: Value(companyId),
-      plateNumber: Value(plateNumber),
-      plateCountry: Value(plateCountry),
-      plateFormatKey: Value(plateFormatKey),
+      plateNumber: plateNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(plateNumber),
+      plateCountry: plateCountry == null && nullToAbsent
+          ? const Value.absent()
+          : Value(plateCountry),
+      plateFormatKey: plateFormatKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(plateFormatKey),
       makeId: Value(makeId),
       modelId: modelId == null && nullToAbsent
           ? const Value.absent()
           : Value(modelId),
-      cargoTypeId: Value(cargoTypeId),
-      cargoQuantity: cargoQuantity == null && nullToAbsent
-          ? const Value.absent()
-          : Value(cargoQuantity),
-      quantityUnit: quantityUnit == null && nullToAbsent
-          ? const Value.absent()
-          : Value(quantityUnit),
       crossedAt: Value(crossedAt),
       latitude: latitude == null && nullToAbsent
           ? const Value.absent()
@@ -2265,14 +2167,11 @@ class Crossing extends DataClass implements Insertable<Crossing> {
       id: serializer.fromJson<int>(json['id']),
       uuid: serializer.fromJson<String>(json['uuid']),
       companyId: serializer.fromJson<int>(json['companyId']),
-      plateNumber: serializer.fromJson<String>(json['plateNumber']),
-      plateCountry: serializer.fromJson<String>(json['plateCountry']),
-      plateFormatKey: serializer.fromJson<String>(json['plateFormatKey']),
+      plateNumber: serializer.fromJson<String?>(json['plateNumber']),
+      plateCountry: serializer.fromJson<String?>(json['plateCountry']),
+      plateFormatKey: serializer.fromJson<String?>(json['plateFormatKey']),
       makeId: serializer.fromJson<int>(json['makeId']),
       modelId: serializer.fromJson<int?>(json['modelId']),
-      cargoTypeId: serializer.fromJson<int>(json['cargoTypeId']),
-      cargoQuantity: serializer.fromJson<double?>(json['cargoQuantity']),
-      quantityUnit: serializer.fromJson<String?>(json['quantityUnit']),
       crossedAt: serializer.fromJson<DateTime>(json['crossedAt']),
       latitude: serializer.fromJson<double?>(json['latitude']),
       longitude: serializer.fromJson<double?>(json['longitude']),
@@ -2291,14 +2190,11 @@ class Crossing extends DataClass implements Insertable<Crossing> {
       'id': serializer.toJson<int>(id),
       'uuid': serializer.toJson<String>(uuid),
       'companyId': serializer.toJson<int>(companyId),
-      'plateNumber': serializer.toJson<String>(plateNumber),
-      'plateCountry': serializer.toJson<String>(plateCountry),
-      'plateFormatKey': serializer.toJson<String>(plateFormatKey),
+      'plateNumber': serializer.toJson<String?>(plateNumber),
+      'plateCountry': serializer.toJson<String?>(plateCountry),
+      'plateFormatKey': serializer.toJson<String?>(plateFormatKey),
       'makeId': serializer.toJson<int>(makeId),
       'modelId': serializer.toJson<int?>(modelId),
-      'cargoTypeId': serializer.toJson<int>(cargoTypeId),
-      'cargoQuantity': serializer.toJson<double?>(cargoQuantity),
-      'quantityUnit': serializer.toJson<String?>(quantityUnit),
       'crossedAt': serializer.toJson<DateTime>(crossedAt),
       'latitude': serializer.toJson<double?>(latitude),
       'longitude': serializer.toJson<double?>(longitude),
@@ -2315,14 +2211,11 @@ class Crossing extends DataClass implements Insertable<Crossing> {
     int? id,
     String? uuid,
     int? companyId,
-    String? plateNumber,
-    String? plateCountry,
-    String? plateFormatKey,
+    Value<String?> plateNumber = const Value.absent(),
+    Value<String?> plateCountry = const Value.absent(),
+    Value<String?> plateFormatKey = const Value.absent(),
     int? makeId,
     Value<int?> modelId = const Value.absent(),
-    int? cargoTypeId,
-    Value<double?> cargoQuantity = const Value.absent(),
-    Value<String?> quantityUnit = const Value.absent(),
     DateTime? crossedAt,
     Value<double?> latitude = const Value.absent(),
     Value<double?> longitude = const Value.absent(),
@@ -2336,16 +2229,13 @@ class Crossing extends DataClass implements Insertable<Crossing> {
     id: id ?? this.id,
     uuid: uuid ?? this.uuid,
     companyId: companyId ?? this.companyId,
-    plateNumber: plateNumber ?? this.plateNumber,
-    plateCountry: plateCountry ?? this.plateCountry,
-    plateFormatKey: plateFormatKey ?? this.plateFormatKey,
+    plateNumber: plateNumber.present ? plateNumber.value : this.plateNumber,
+    plateCountry: plateCountry.present ? plateCountry.value : this.plateCountry,
+    plateFormatKey: plateFormatKey.present
+        ? plateFormatKey.value
+        : this.plateFormatKey,
     makeId: makeId ?? this.makeId,
     modelId: modelId.present ? modelId.value : this.modelId,
-    cargoTypeId: cargoTypeId ?? this.cargoTypeId,
-    cargoQuantity: cargoQuantity.present
-        ? cargoQuantity.value
-        : this.cargoQuantity,
-    quantityUnit: quantityUnit.present ? quantityUnit.value : this.quantityUnit,
     crossedAt: crossedAt ?? this.crossedAt,
     latitude: latitude.present ? latitude.value : this.latitude,
     longitude: longitude.present ? longitude.value : this.longitude,
@@ -2372,15 +2262,6 @@ class Crossing extends DataClass implements Insertable<Crossing> {
           : this.plateFormatKey,
       makeId: data.makeId.present ? data.makeId.value : this.makeId,
       modelId: data.modelId.present ? data.modelId.value : this.modelId,
-      cargoTypeId: data.cargoTypeId.present
-          ? data.cargoTypeId.value
-          : this.cargoTypeId,
-      cargoQuantity: data.cargoQuantity.present
-          ? data.cargoQuantity.value
-          : this.cargoQuantity,
-      quantityUnit: data.quantityUnit.present
-          ? data.quantityUnit.value
-          : this.quantityUnit,
       crossedAt: data.crossedAt.present ? data.crossedAt.value : this.crossedAt,
       latitude: data.latitude.present ? data.latitude.value : this.latitude,
       longitude: data.longitude.present ? data.longitude.value : this.longitude,
@@ -2406,9 +2287,6 @@ class Crossing extends DataClass implements Insertable<Crossing> {
           ..write('plateFormatKey: $plateFormatKey, ')
           ..write('makeId: $makeId, ')
           ..write('modelId: $modelId, ')
-          ..write('cargoTypeId: $cargoTypeId, ')
-          ..write('cargoQuantity: $cargoQuantity, ')
-          ..write('quantityUnit: $quantityUnit, ')
           ..write('crossedAt: $crossedAt, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
@@ -2432,9 +2310,6 @@ class Crossing extends DataClass implements Insertable<Crossing> {
     plateFormatKey,
     makeId,
     modelId,
-    cargoTypeId,
-    cargoQuantity,
-    quantityUnit,
     crossedAt,
     latitude,
     longitude,
@@ -2457,9 +2332,6 @@ class Crossing extends DataClass implements Insertable<Crossing> {
           other.plateFormatKey == this.plateFormatKey &&
           other.makeId == this.makeId &&
           other.modelId == this.modelId &&
-          other.cargoTypeId == this.cargoTypeId &&
-          other.cargoQuantity == this.cargoQuantity &&
-          other.quantityUnit == this.quantityUnit &&
           other.crossedAt == this.crossedAt &&
           other.latitude == this.latitude &&
           other.longitude == this.longitude &&
@@ -2475,14 +2347,11 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
   final Value<int> id;
   final Value<String> uuid;
   final Value<int> companyId;
-  final Value<String> plateNumber;
-  final Value<String> plateCountry;
-  final Value<String> plateFormatKey;
+  final Value<String?> plateNumber;
+  final Value<String?> plateCountry;
+  final Value<String?> plateFormatKey;
   final Value<int> makeId;
   final Value<int?> modelId;
-  final Value<int> cargoTypeId;
-  final Value<double?> cargoQuantity;
-  final Value<String?> quantityUnit;
   final Value<DateTime> crossedAt;
   final Value<double?> latitude;
   final Value<double?> longitude;
@@ -2501,9 +2370,6 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
     this.plateFormatKey = const Value.absent(),
     this.makeId = const Value.absent(),
     this.modelId = const Value.absent(),
-    this.cargoTypeId = const Value.absent(),
-    this.cargoQuantity = const Value.absent(),
-    this.quantityUnit = const Value.absent(),
     this.crossedAt = const Value.absent(),
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
@@ -2518,14 +2384,11 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
     this.id = const Value.absent(),
     required String uuid,
     required int companyId,
-    required String plateNumber,
-    required String plateCountry,
-    required String plateFormatKey,
+    this.plateNumber = const Value.absent(),
+    this.plateCountry = const Value.absent(),
+    this.plateFormatKey = const Value.absent(),
     required int makeId,
     this.modelId = const Value.absent(),
-    required int cargoTypeId,
-    this.cargoQuantity = const Value.absent(),
-    this.quantityUnit = const Value.absent(),
     required DateTime crossedAt,
     this.latitude = const Value.absent(),
     this.longitude = const Value.absent(),
@@ -2537,11 +2400,7 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
     this.isDeleted = const Value.absent(),
   }) : uuid = Value(uuid),
        companyId = Value(companyId),
-       plateNumber = Value(plateNumber),
-       plateCountry = Value(plateCountry),
-       plateFormatKey = Value(plateFormatKey),
        makeId = Value(makeId),
-       cargoTypeId = Value(cargoTypeId),
        crossedAt = Value(crossedAt),
        createdAt = Value(createdAt),
        updatedAt = Value(updatedAt);
@@ -2554,9 +2413,6 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
     Expression<String>? plateFormatKey,
     Expression<int>? makeId,
     Expression<int>? modelId,
-    Expression<int>? cargoTypeId,
-    Expression<double>? cargoQuantity,
-    Expression<String>? quantityUnit,
     Expression<DateTime>? crossedAt,
     Expression<double>? latitude,
     Expression<double>? longitude,
@@ -2576,9 +2432,6 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
       if (plateFormatKey != null) 'plate_format_key': plateFormatKey,
       if (makeId != null) 'make_id': makeId,
       if (modelId != null) 'model_id': modelId,
-      if (cargoTypeId != null) 'cargo_type_id': cargoTypeId,
-      if (cargoQuantity != null) 'cargo_quantity': cargoQuantity,
-      if (quantityUnit != null) 'quantity_unit': quantityUnit,
       if (crossedAt != null) 'crossed_at': crossedAt,
       if (latitude != null) 'latitude': latitude,
       if (longitude != null) 'longitude': longitude,
@@ -2595,14 +2448,11 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
     Value<int>? id,
     Value<String>? uuid,
     Value<int>? companyId,
-    Value<String>? plateNumber,
-    Value<String>? plateCountry,
-    Value<String>? plateFormatKey,
+    Value<String?>? plateNumber,
+    Value<String?>? plateCountry,
+    Value<String?>? plateFormatKey,
     Value<int>? makeId,
     Value<int?>? modelId,
-    Value<int>? cargoTypeId,
-    Value<double?>? cargoQuantity,
-    Value<String?>? quantityUnit,
     Value<DateTime>? crossedAt,
     Value<double?>? latitude,
     Value<double?>? longitude,
@@ -2622,9 +2472,6 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
       plateFormatKey: plateFormatKey ?? this.plateFormatKey,
       makeId: makeId ?? this.makeId,
       modelId: modelId ?? this.modelId,
-      cargoTypeId: cargoTypeId ?? this.cargoTypeId,
-      cargoQuantity: cargoQuantity ?? this.cargoQuantity,
-      quantityUnit: quantityUnit ?? this.quantityUnit,
       crossedAt: crossedAt ?? this.crossedAt,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
@@ -2663,15 +2510,6 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
     }
     if (modelId.present) {
       map['model_id'] = Variable<int>(modelId.value);
-    }
-    if (cargoTypeId.present) {
-      map['cargo_type_id'] = Variable<int>(cargoTypeId.value);
-    }
-    if (cargoQuantity.present) {
-      map['cargo_quantity'] = Variable<double>(cargoQuantity.value);
-    }
-    if (quantityUnit.present) {
-      map['quantity_unit'] = Variable<String>(quantityUnit.value);
     }
     if (crossedAt.present) {
       map['crossed_at'] = Variable<DateTime>(crossedAt.value);
@@ -2714,9 +2552,6 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
           ..write('plateFormatKey: $plateFormatKey, ')
           ..write('makeId: $makeId, ')
           ..write('modelId: $modelId, ')
-          ..write('cargoTypeId: $cargoTypeId, ')
-          ..write('cargoQuantity: $cargoQuantity, ')
-          ..write('quantityUnit: $quantityUnit, ')
           ..write('crossedAt: $crossedAt, ')
           ..write('latitude: $latitude, ')
           ..write('longitude: $longitude, ')
@@ -2726,6 +2561,462 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
           ..write('serverId: $serverId, ')
           ..write('syncStatus: $syncStatus, ')
           ..write('isDeleted: $isDeleted')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CrossingCargosTable extends CrossingCargos
+    with TableInfo<$CrossingCargosTable, CrossingCargo> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CrossingCargosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _uuidMeta = const VerificationMeta('uuid');
+  @override
+  late final GeneratedColumn<String> uuid = GeneratedColumn<String>(
+    'uuid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _crossingIdMeta = const VerificationMeta(
+    'crossingId',
+  );
+  @override
+  late final GeneratedColumn<int> crossingId = GeneratedColumn<int>(
+    'crossing_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES crossings (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _cargoTypeIdMeta = const VerificationMeta(
+    'cargoTypeId',
+  );
+  @override
+  late final GeneratedColumn<int> cargoTypeId = GeneratedColumn<int>(
+    'cargo_type_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES cargo_types (id)',
+    ),
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+    'quantity',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    uuid,
+    crossingId,
+    cargoTypeId,
+    quantity,
+    unit,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'crossing_cargos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CrossingCargo> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uuid')) {
+      context.handle(
+        _uuidMeta,
+        uuid.isAcceptableOrUnknown(data['uuid']!, _uuidMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_uuidMeta);
+    }
+    if (data.containsKey('crossing_id')) {
+      context.handle(
+        _crossingIdMeta,
+        crossingId.isAcceptableOrUnknown(data['crossing_id']!, _crossingIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_crossingIdMeta);
+    }
+    if (data.containsKey('cargo_type_id')) {
+      context.handle(
+        _cargoTypeIdMeta,
+        cargoTypeId.isAcceptableOrUnknown(
+          data['cargo_type_id']!,
+          _cargoTypeIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_cargoTypeIdMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CrossingCargo map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CrossingCargo(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      uuid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uuid'],
+      )!,
+      crossingId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}crossing_id'],
+      )!,
+      cargoTypeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}cargo_type_id'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}quantity'],
+      ),
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CrossingCargosTable createAlias(String alias) {
+    return $CrossingCargosTable(attachedDatabase, alias);
+  }
+}
+
+class CrossingCargo extends DataClass implements Insertable<CrossingCargo> {
+  final int id;
+  final String uuid;
+  final int crossingId;
+  final int cargoTypeId;
+  final double? quantity;
+  final String? unit;
+  final DateTime createdAt;
+  const CrossingCargo({
+    required this.id,
+    required this.uuid,
+    required this.crossingId,
+    required this.cargoTypeId,
+    this.quantity,
+    this.unit,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['uuid'] = Variable<String>(uuid);
+    map['crossing_id'] = Variable<int>(crossingId);
+    map['cargo_type_id'] = Variable<int>(cargoTypeId);
+    if (!nullToAbsent || quantity != null) {
+      map['quantity'] = Variable<double>(quantity);
+    }
+    if (!nullToAbsent || unit != null) {
+      map['unit'] = Variable<String>(unit);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  CrossingCargosCompanion toCompanion(bool nullToAbsent) {
+    return CrossingCargosCompanion(
+      id: Value(id),
+      uuid: Value(uuid),
+      crossingId: Value(crossingId),
+      cargoTypeId: Value(cargoTypeId),
+      quantity: quantity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quantity),
+      unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory CrossingCargo.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CrossingCargo(
+      id: serializer.fromJson<int>(json['id']),
+      uuid: serializer.fromJson<String>(json['uuid']),
+      crossingId: serializer.fromJson<int>(json['crossingId']),
+      cargoTypeId: serializer.fromJson<int>(json['cargoTypeId']),
+      quantity: serializer.fromJson<double?>(json['quantity']),
+      unit: serializer.fromJson<String?>(json['unit']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'uuid': serializer.toJson<String>(uuid),
+      'crossingId': serializer.toJson<int>(crossingId),
+      'cargoTypeId': serializer.toJson<int>(cargoTypeId),
+      'quantity': serializer.toJson<double?>(quantity),
+      'unit': serializer.toJson<String?>(unit),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  CrossingCargo copyWith({
+    int? id,
+    String? uuid,
+    int? crossingId,
+    int? cargoTypeId,
+    Value<double?> quantity = const Value.absent(),
+    Value<String?> unit = const Value.absent(),
+    DateTime? createdAt,
+  }) => CrossingCargo(
+    id: id ?? this.id,
+    uuid: uuid ?? this.uuid,
+    crossingId: crossingId ?? this.crossingId,
+    cargoTypeId: cargoTypeId ?? this.cargoTypeId,
+    quantity: quantity.present ? quantity.value : this.quantity,
+    unit: unit.present ? unit.value : this.unit,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  CrossingCargo copyWithCompanion(CrossingCargosCompanion data) {
+    return CrossingCargo(
+      id: data.id.present ? data.id.value : this.id,
+      uuid: data.uuid.present ? data.uuid.value : this.uuid,
+      crossingId: data.crossingId.present
+          ? data.crossingId.value
+          : this.crossingId,
+      cargoTypeId: data.cargoTypeId.present
+          ? data.cargoTypeId.value
+          : this.cargoTypeId,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CrossingCargo(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('crossingId: $crossingId, ')
+          ..write('cargoTypeId: $cargoTypeId, ')
+          ..write('quantity: $quantity, ')
+          ..write('unit: $unit, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, uuid, crossingId, cargoTypeId, quantity, unit, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CrossingCargo &&
+          other.id == this.id &&
+          other.uuid == this.uuid &&
+          other.crossingId == this.crossingId &&
+          other.cargoTypeId == this.cargoTypeId &&
+          other.quantity == this.quantity &&
+          other.unit == this.unit &&
+          other.createdAt == this.createdAt);
+}
+
+class CrossingCargosCompanion extends UpdateCompanion<CrossingCargo> {
+  final Value<int> id;
+  final Value<String> uuid;
+  final Value<int> crossingId;
+  final Value<int> cargoTypeId;
+  final Value<double?> quantity;
+  final Value<String?> unit;
+  final Value<DateTime> createdAt;
+  const CrossingCargosCompanion({
+    this.id = const Value.absent(),
+    this.uuid = const Value.absent(),
+    this.crossingId = const Value.absent(),
+    this.cargoTypeId = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  CrossingCargosCompanion.insert({
+    this.id = const Value.absent(),
+    required String uuid,
+    required int crossingId,
+    required int cargoTypeId,
+    this.quantity = const Value.absent(),
+    this.unit = const Value.absent(),
+    required DateTime createdAt,
+  }) : uuid = Value(uuid),
+       crossingId = Value(crossingId),
+       cargoTypeId = Value(cargoTypeId),
+       createdAt = Value(createdAt);
+  static Insertable<CrossingCargo> custom({
+    Expression<int>? id,
+    Expression<String>? uuid,
+    Expression<int>? crossingId,
+    Expression<int>? cargoTypeId,
+    Expression<double>? quantity,
+    Expression<String>? unit,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (uuid != null) 'uuid': uuid,
+      if (crossingId != null) 'crossing_id': crossingId,
+      if (cargoTypeId != null) 'cargo_type_id': cargoTypeId,
+      if (quantity != null) 'quantity': quantity,
+      if (unit != null) 'unit': unit,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  CrossingCargosCompanion copyWith({
+    Value<int>? id,
+    Value<String>? uuid,
+    Value<int>? crossingId,
+    Value<int>? cargoTypeId,
+    Value<double?>? quantity,
+    Value<String?>? unit,
+    Value<DateTime>? createdAt,
+  }) {
+    return CrossingCargosCompanion(
+      id: id ?? this.id,
+      uuid: uuid ?? this.uuid,
+      crossingId: crossingId ?? this.crossingId,
+      cargoTypeId: cargoTypeId ?? this.cargoTypeId,
+      quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (uuid.present) {
+      map['uuid'] = Variable<String>(uuid.value);
+    }
+    if (crossingId.present) {
+      map['crossing_id'] = Variable<int>(crossingId.value);
+    }
+    if (cargoTypeId.present) {
+      map['cargo_type_id'] = Variable<int>(cargoTypeId.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CrossingCargosCompanion(')
+          ..write('id: $id, ')
+          ..write('uuid: $uuid, ')
+          ..write('crossingId: $crossingId, ')
+          ..write('cargoTypeId: $cargoTypeId, ')
+          ..write('quantity: $quantity, ')
+          ..write('unit: $unit, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
@@ -3556,6 +3847,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $VehicleModelsTable vehicleModels = $VehicleModelsTable(this);
   late final $CargoTypesTable cargoTypes = $CargoTypesTable(this);
   late final $CrossingsTable crossings = $CrossingsTable(this);
+  late final $CrossingCargosTable crossingCargos = $CrossingCargosTable(this);
   late final $CrossingPhotosTable crossingPhotos = $CrossingPhotosTable(this);
   late final $ChangeHistoryTable changeHistory = $ChangeHistoryTable(this);
   @override
@@ -3568,6 +3860,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     vehicleModels,
     cargoTypes,
     crossings,
+    crossingCargos,
     crossingPhotos,
     changeHistory,
   ];
@@ -3579,6 +3872,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('vehicle_models', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'crossings',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('crossing_cargos', kind: UpdateKind.delete)],
     ),
     WritePropagation(
       on: TableUpdateQuery.onTableName(
@@ -4777,19 +5077,19 @@ final class $$CargoTypesTableReferences
     extends BaseReferences<_$AppDatabase, $CargoTypesTable, CargoType> {
   $$CargoTypesTableReferences(super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<$CrossingsTable, List<Crossing>>
-  _crossingsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
-    db.crossings,
-    aliasName: 'cargo_types__id__crossings__cargo_type_id',
+  static MultiTypedResultKey<$CrossingCargosTable, List<CrossingCargo>>
+  _crossingCargosRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.crossingCargos,
+    aliasName: 'cargo_types__id__crossing_cargos__cargo_type_id',
   );
 
-  $$CrossingsTableProcessedTableManager get crossingsRefs {
-    final manager = $$CrossingsTableTableManager(
+  $$CrossingCargosTableProcessedTableManager get crossingCargosRefs {
+    final manager = $$CrossingCargosTableTableManager(
       $_db,
-      $_db.crossings,
+      $_db.crossingCargos,
     ).filter((f) => f.cargoTypeId.id.sqlEquals($_itemColumn<int>('id')!));
 
-    final cache = $_typedResult.readTableOrNull(_crossingsRefsTable($_db));
+    final cache = $_typedResult.readTableOrNull(_crossingCargosRefsTable($_db));
     return ProcessedTableManager(
       manager.$state.copyWith(prefetchedData: cache),
     );
@@ -4830,22 +5130,22 @@ class $$CargoTypesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  Expression<bool> crossingsRefs(
-    Expression<bool> Function($$CrossingsTableFilterComposer f) f,
+  Expression<bool> crossingCargosRefs(
+    Expression<bool> Function($$CrossingCargosTableFilterComposer f) f,
   ) {
-    final $$CrossingsTableFilterComposer composer = $composerBuilder(
+    final $$CrossingCargosTableFilterComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.id,
-      referencedTable: $db.crossings,
+      referencedTable: $db.crossingCargos,
       getReferencedColumn: (t) => t.cargoTypeId,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$CrossingsTableFilterComposer(
+          }) => $$CrossingCargosTableFilterComposer(
             $db: $db,
-            $table: $db.crossings,
+            $table: $db.crossingCargos,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -4915,22 +5215,22 @@ class $$CargoTypesTableAnnotationComposer
   GeneratedColumn<bool> get isHidden =>
       $composableBuilder(column: $table.isHidden, builder: (column) => column);
 
-  Expression<T> crossingsRefs<T extends Object>(
-    Expression<T> Function($$CrossingsTableAnnotationComposer a) f,
+  Expression<T> crossingCargosRefs<T extends Object>(
+    Expression<T> Function($$CrossingCargosTableAnnotationComposer a) f,
   ) {
-    final $$CrossingsTableAnnotationComposer composer = $composerBuilder(
+    final $$CrossingCargosTableAnnotationComposer composer = $composerBuilder(
       composer: this,
       getCurrentColumn: (t) => t.id,
-      referencedTable: $db.crossings,
+      referencedTable: $db.crossingCargos,
       getReferencedColumn: (t) => t.cargoTypeId,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$CrossingsTableAnnotationComposer(
+          }) => $$CrossingCargosTableAnnotationComposer(
             $db: $db,
-            $table: $db.crossings,
+            $table: $db.crossingCargos,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -4954,7 +5254,7 @@ class $$CargoTypesTableTableManager
           $$CargoTypesTableUpdateCompanionBuilder,
           (CargoType, $$CargoTypesTableReferences),
           CargoType,
-          PrefetchHooks Function({bool crossingsRefs})
+          PrefetchHooks Function({bool crossingCargosRefs})
         > {
   $$CargoTypesTableTableManager(_$AppDatabase db, $CargoTypesTable table)
     : super(
@@ -5003,28 +5303,30 @@ class $$CargoTypesTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({crossingsRefs = false}) {
+          prefetchHooksCallback: ({crossingCargosRefs = false}) {
             return PrefetchHooks(
               db: db,
-              explicitlyWatchedTables: [if (crossingsRefs) db.crossings],
+              explicitlyWatchedTables: [
+                if (crossingCargosRefs) db.crossingCargos,
+              ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
                 return [
-                  if (crossingsRefs)
+                  if (crossingCargosRefs)
                     await $_getPrefetchedData<
                       CargoType,
                       $CargoTypesTable,
-                      Crossing
+                      CrossingCargo
                     >(
                       currentTable: table,
                       referencedTable: $$CargoTypesTableReferences
-                          ._crossingsRefsTable(db),
+                          ._crossingCargosRefsTable(db),
                       managerFromTypedResult: (p0) =>
                           $$CargoTypesTableReferences(
                             db,
                             table,
                             p0,
-                          ).crossingsRefs,
+                          ).crossingCargosRefs,
                       referencedItemsForCurrentItem: (item, referencedItems) =>
                           referencedItems.where(
                             (e) => e.cargoTypeId == item.id,
@@ -5051,21 +5353,18 @@ typedef $$CargoTypesTableProcessedTableManager =
       $$CargoTypesTableUpdateCompanionBuilder,
       (CargoType, $$CargoTypesTableReferences),
       CargoType,
-      PrefetchHooks Function({bool crossingsRefs})
+      PrefetchHooks Function({bool crossingCargosRefs})
     >;
 typedef $$CrossingsTableCreateCompanionBuilder =
     CrossingsCompanion Function({
       Value<int> id,
       required String uuid,
       required int companyId,
-      required String plateNumber,
-      required String plateCountry,
-      required String plateFormatKey,
+      Value<String?> plateNumber,
+      Value<String?> plateCountry,
+      Value<String?> plateFormatKey,
       required int makeId,
       Value<int?> modelId,
-      required int cargoTypeId,
-      Value<double?> cargoQuantity,
-      Value<String?> quantityUnit,
       required DateTime crossedAt,
       Value<double?> latitude,
       Value<double?> longitude,
@@ -5081,14 +5380,11 @@ typedef $$CrossingsTableUpdateCompanionBuilder =
       Value<int> id,
       Value<String> uuid,
       Value<int> companyId,
-      Value<String> plateNumber,
-      Value<String> plateCountry,
-      Value<String> plateFormatKey,
+      Value<String?> plateNumber,
+      Value<String?> plateCountry,
+      Value<String?> plateFormatKey,
       Value<int> makeId,
       Value<int?> modelId,
-      Value<int> cargoTypeId,
-      Value<double?> cargoQuantity,
-      Value<String?> quantityUnit,
       Value<DateTime> crossedAt,
       Value<double?> latitude,
       Value<double?> longitude,
@@ -5155,20 +5451,21 @@ final class $$CrossingsTableReferences
     );
   }
 
-  static $CargoTypesTable _cargoTypeIdTable(_$AppDatabase db) =>
-      db.cargoTypes.createAlias('crossings__cargo_type_id__cargo_types__id');
+  static MultiTypedResultKey<$CrossingCargosTable, List<CrossingCargo>>
+  _crossingCargosRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.crossingCargos,
+    aliasName: 'crossings__id__crossing_cargos__crossing_id',
+  );
 
-  $$CargoTypesTableProcessedTableManager get cargoTypeId {
-    final $_column = $_itemColumn<int>('cargo_type_id')!;
-
-    final manager = $$CargoTypesTableTableManager(
+  $$CrossingCargosTableProcessedTableManager get crossingCargosRefs {
+    final manager = $$CrossingCargosTableTableManager(
       $_db,
-      $_db.cargoTypes,
-    ).filter((f) => f.id.sqlEquals($_column));
-    final item = $_typedResult.readTableOrNull(_cargoTypeIdTable($_db));
-    if (item == null) return manager;
+      $_db.crossingCargos,
+    ).filter((f) => f.crossingId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_crossingCargosRefsTable($_db));
     return ProcessedTableManager(
-      manager.$state.copyWith(prefetchedData: [item]),
+      manager.$state.copyWith(prefetchedData: cache),
     );
   }
 
@@ -5222,16 +5519,6 @@ class $$CrossingsTableFilterComposer
 
   ColumnFilters<String> get plateFormatKey => $composableBuilder(
     column: $table.plateFormatKey,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get cargoQuantity => $composableBuilder(
-    column: $table.cargoQuantity,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get quantityUnit => $composableBuilder(
-    column: $table.quantityUnit,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5349,27 +5636,29 @@ class $$CrossingsTableFilterComposer
     return composer;
   }
 
-  $$CargoTypesTableFilterComposer get cargoTypeId {
-    final $$CargoTypesTableFilterComposer composer = $composerBuilder(
+  Expression<bool> crossingCargosRefs(
+    Expression<bool> Function($$CrossingCargosTableFilterComposer f) f,
+  ) {
+    final $$CrossingCargosTableFilterComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.cargoTypeId,
-      referencedTable: $db.cargoTypes,
-      getReferencedColumn: (t) => t.id,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.crossingCargos,
+      getReferencedColumn: (t) => t.crossingId,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$CargoTypesTableFilterComposer(
+          }) => $$CrossingCargosTableFilterComposer(
             $db: $db,
-            $table: $db.cargoTypes,
+            $table: $db.crossingCargos,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
                 $removeJoinBuilderFromRootComposer,
           ),
     );
-    return composer;
+    return f(composer);
   }
 
   Expression<bool> crossingPhotosRefs(
@@ -5429,16 +5718,6 @@ class $$CrossingsTableOrderingComposer
 
   ColumnOrderings<String> get plateFormatKey => $composableBuilder(
     column: $table.plateFormatKey,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<double> get cargoQuantity => $composableBuilder(
-    column: $table.cargoQuantity,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get quantityUnit => $composableBuilder(
-    column: $table.quantityUnit,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5555,29 +5834,6 @@ class $$CrossingsTableOrderingComposer
     );
     return composer;
   }
-
-  $$CargoTypesTableOrderingComposer get cargoTypeId {
-    final $$CargoTypesTableOrderingComposer composer = $composerBuilder(
-      composer: this,
-      getCurrentColumn: (t) => t.cargoTypeId,
-      referencedTable: $db.cargoTypes,
-      getReferencedColumn: (t) => t.id,
-      builder:
-          (
-            joinBuilder, {
-            $addJoinBuilderToRootComposer,
-            $removeJoinBuilderFromRootComposer,
-          }) => $$CargoTypesTableOrderingComposer(
-            $db: $db,
-            $table: $db.cargoTypes,
-            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
-            joinBuilder: joinBuilder,
-            $removeJoinBuilderFromRootComposer:
-                $removeJoinBuilderFromRootComposer,
-          ),
-    );
-    return composer;
-  }
 }
 
 class $$CrossingsTableAnnotationComposer
@@ -5607,16 +5863,6 @@ class $$CrossingsTableAnnotationComposer
 
   GeneratedColumn<String> get plateFormatKey => $composableBuilder(
     column: $table.plateFormatKey,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<double> get cargoQuantity => $composableBuilder(
-    column: $table.cargoQuantity,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get quantityUnit => $composableBuilder(
-    column: $table.quantityUnit,
     builder: (column) => column,
   );
 
@@ -5718,27 +5964,29 @@ class $$CrossingsTableAnnotationComposer
     return composer;
   }
 
-  $$CargoTypesTableAnnotationComposer get cargoTypeId {
-    final $$CargoTypesTableAnnotationComposer composer = $composerBuilder(
+  Expression<T> crossingCargosRefs<T extends Object>(
+    Expression<T> Function($$CrossingCargosTableAnnotationComposer a) f,
+  ) {
+    final $$CrossingCargosTableAnnotationComposer composer = $composerBuilder(
       composer: this,
-      getCurrentColumn: (t) => t.cargoTypeId,
-      referencedTable: $db.cargoTypes,
-      getReferencedColumn: (t) => t.id,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.crossingCargos,
+      getReferencedColumn: (t) => t.crossingId,
       builder:
           (
             joinBuilder, {
             $addJoinBuilderToRootComposer,
             $removeJoinBuilderFromRootComposer,
-          }) => $$CargoTypesTableAnnotationComposer(
+          }) => $$CrossingCargosTableAnnotationComposer(
             $db: $db,
-            $table: $db.cargoTypes,
+            $table: $db.crossingCargos,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
                 $removeJoinBuilderFromRootComposer,
           ),
     );
-    return composer;
+    return f(composer);
   }
 
   Expression<T> crossingPhotosRefs<T extends Object>(
@@ -5784,7 +6032,7 @@ class $$CrossingsTableTableManager
             bool companyId,
             bool makeId,
             bool modelId,
-            bool cargoTypeId,
+            bool crossingCargosRefs,
             bool crossingPhotosRefs,
           })
         > {
@@ -5804,14 +6052,11 @@ class $$CrossingsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> uuid = const Value.absent(),
                 Value<int> companyId = const Value.absent(),
-                Value<String> plateNumber = const Value.absent(),
-                Value<String> plateCountry = const Value.absent(),
-                Value<String> plateFormatKey = const Value.absent(),
+                Value<String?> plateNumber = const Value.absent(),
+                Value<String?> plateCountry = const Value.absent(),
+                Value<String?> plateFormatKey = const Value.absent(),
                 Value<int> makeId = const Value.absent(),
                 Value<int?> modelId = const Value.absent(),
-                Value<int> cargoTypeId = const Value.absent(),
-                Value<double?> cargoQuantity = const Value.absent(),
-                Value<String?> quantityUnit = const Value.absent(),
                 Value<DateTime> crossedAt = const Value.absent(),
                 Value<double?> latitude = const Value.absent(),
                 Value<double?> longitude = const Value.absent(),
@@ -5830,9 +6075,6 @@ class $$CrossingsTableTableManager
                 plateFormatKey: plateFormatKey,
                 makeId: makeId,
                 modelId: modelId,
-                cargoTypeId: cargoTypeId,
-                cargoQuantity: cargoQuantity,
-                quantityUnit: quantityUnit,
                 crossedAt: crossedAt,
                 latitude: latitude,
                 longitude: longitude,
@@ -5848,14 +6090,11 @@ class $$CrossingsTableTableManager
                 Value<int> id = const Value.absent(),
                 required String uuid,
                 required int companyId,
-                required String plateNumber,
-                required String plateCountry,
-                required String plateFormatKey,
+                Value<String?> plateNumber = const Value.absent(),
+                Value<String?> plateCountry = const Value.absent(),
+                Value<String?> plateFormatKey = const Value.absent(),
                 required int makeId,
                 Value<int?> modelId = const Value.absent(),
-                required int cargoTypeId,
-                Value<double?> cargoQuantity = const Value.absent(),
-                Value<String?> quantityUnit = const Value.absent(),
                 required DateTime crossedAt,
                 Value<double?> latitude = const Value.absent(),
                 Value<double?> longitude = const Value.absent(),
@@ -5874,9 +6113,6 @@ class $$CrossingsTableTableManager
                 plateFormatKey: plateFormatKey,
                 makeId: makeId,
                 modelId: modelId,
-                cargoTypeId: cargoTypeId,
-                cargoQuantity: cargoQuantity,
-                quantityUnit: quantityUnit,
                 crossedAt: crossedAt,
                 latitude: latitude,
                 longitude: longitude,
@@ -5900,12 +6136,13 @@ class $$CrossingsTableTableManager
                 companyId = false,
                 makeId = false,
                 modelId = false,
-                cargoTypeId = false,
+                crossingCargosRefs = false,
                 crossingPhotosRefs = false,
               }) {
                 return PrefetchHooks(
                   db: db,
                   explicitlyWatchedTables: [
+                    if (crossingCargosRefs) db.crossingCargos,
                     if (crossingPhotosRefs) db.crossingPhotos,
                   ],
                   addJoins:
@@ -5963,24 +6200,32 @@ class $$CrossingsTableTableManager
                                   )
                                   as T;
                         }
-                        if (cargoTypeId) {
-                          state =
-                              state.withJoin(
-                                    currentTable: table,
-                                    currentColumn: table.cargoTypeId,
-                                    referencedTable: $$CrossingsTableReferences
-                                        ._cargoTypeIdTable(db),
-                                    referencedColumn: $$CrossingsTableReferences
-                                        ._cargoTypeIdTable(db)
-                                        .id,
-                                  )
-                                  as T;
-                        }
 
                         return state;
                       },
                   getPrefetchedDataCallback: (items) async {
                     return [
+                      if (crossingCargosRefs)
+                        await $_getPrefetchedData<
+                          Crossing,
+                          $CrossingsTable,
+                          CrossingCargo
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CrossingsTableReferences
+                              ._crossingCargosRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CrossingsTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).crossingCargosRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.crossingId == item.id,
+                              ),
+                          typedResults: items,
+                        ),
                       if (crossingPhotosRefs)
                         await $_getPrefetchedData<
                           Crossing,
@@ -6026,9 +6271,452 @@ typedef $$CrossingsTableProcessedTableManager =
         bool companyId,
         bool makeId,
         bool modelId,
-        bool cargoTypeId,
+        bool crossingCargosRefs,
         bool crossingPhotosRefs,
       })
+    >;
+typedef $$CrossingCargosTableCreateCompanionBuilder =
+    CrossingCargosCompanion Function({
+      Value<int> id,
+      required String uuid,
+      required int crossingId,
+      required int cargoTypeId,
+      Value<double?> quantity,
+      Value<String?> unit,
+      required DateTime createdAt,
+    });
+typedef $$CrossingCargosTableUpdateCompanionBuilder =
+    CrossingCargosCompanion Function({
+      Value<int> id,
+      Value<String> uuid,
+      Value<int> crossingId,
+      Value<int> cargoTypeId,
+      Value<double?> quantity,
+      Value<String?> unit,
+      Value<DateTime> createdAt,
+    });
+
+final class $$CrossingCargosTableReferences
+    extends BaseReferences<_$AppDatabase, $CrossingCargosTable, CrossingCargo> {
+  $$CrossingCargosTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $CrossingsTable _crossingIdTable(_$AppDatabase db) =>
+      db.crossings.createAlias('crossing_cargos__crossing_id__crossings__id');
+
+  $$CrossingsTableProcessedTableManager get crossingId {
+    final $_column = $_itemColumn<int>('crossing_id')!;
+
+    final manager = $$CrossingsTableTableManager(
+      $_db,
+      $_db.crossings,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_crossingIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $CargoTypesTable _cargoTypeIdTable(_$AppDatabase db) => db.cargoTypes
+      .createAlias('crossing_cargos__cargo_type_id__cargo_types__id');
+
+  $$CargoTypesTableProcessedTableManager get cargoTypeId {
+    final $_column = $_itemColumn<int>('cargo_type_id')!;
+
+    final manager = $$CargoTypesTableTableManager(
+      $_db,
+      $_db.cargoTypes,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_cargoTypeIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$CrossingCargosTableFilterComposer
+    extends Composer<_$AppDatabase, $CrossingCargosTable> {
+  $$CrossingCargosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CrossingsTableFilterComposer get crossingId {
+    final $$CrossingsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.crossingId,
+      referencedTable: $db.crossings,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CrossingsTableFilterComposer(
+            $db: $db,
+            $table: $db.crossings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CargoTypesTableFilterComposer get cargoTypeId {
+    final $$CargoTypesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cargoTypeId,
+      referencedTable: $db.cargoTypes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CargoTypesTableFilterComposer(
+            $db: $db,
+            $table: $db.cargoTypes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CrossingCargosTableOrderingComposer
+    extends Composer<_$AppDatabase, $CrossingCargosTable> {
+  $$CrossingCargosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uuid => $composableBuilder(
+    column: $table.uuid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CrossingsTableOrderingComposer get crossingId {
+    final $$CrossingsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.crossingId,
+      referencedTable: $db.crossings,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CrossingsTableOrderingComposer(
+            $db: $db,
+            $table: $db.crossings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CargoTypesTableOrderingComposer get cargoTypeId {
+    final $$CargoTypesTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cargoTypeId,
+      referencedTable: $db.cargoTypes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CargoTypesTableOrderingComposer(
+            $db: $db,
+            $table: $db.cargoTypes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CrossingCargosTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CrossingCargosTable> {
+  $$CrossingCargosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uuid =>
+      $composableBuilder(column: $table.uuid, builder: (column) => column);
+
+  GeneratedColumn<double> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$CrossingsTableAnnotationComposer get crossingId {
+    final $$CrossingsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.crossingId,
+      referencedTable: $db.crossings,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CrossingsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.crossings,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$CargoTypesTableAnnotationComposer get cargoTypeId {
+    final $$CargoTypesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.cargoTypeId,
+      referencedTable: $db.cargoTypes,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CargoTypesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.cargoTypes,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$CrossingCargosTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CrossingCargosTable,
+          CrossingCargo,
+          $$CrossingCargosTableFilterComposer,
+          $$CrossingCargosTableOrderingComposer,
+          $$CrossingCargosTableAnnotationComposer,
+          $$CrossingCargosTableCreateCompanionBuilder,
+          $$CrossingCargosTableUpdateCompanionBuilder,
+          (CrossingCargo, $$CrossingCargosTableReferences),
+          CrossingCargo,
+          PrefetchHooks Function({bool crossingId, bool cargoTypeId})
+        > {
+  $$CrossingCargosTableTableManager(
+    _$AppDatabase db,
+    $CrossingCargosTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CrossingCargosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CrossingCargosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CrossingCargosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uuid = const Value.absent(),
+                Value<int> crossingId = const Value.absent(),
+                Value<int> cargoTypeId = const Value.absent(),
+                Value<double?> quantity = const Value.absent(),
+                Value<String?> unit = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => CrossingCargosCompanion(
+                id: id,
+                uuid: uuid,
+                crossingId: crossingId,
+                cargoTypeId: cargoTypeId,
+                quantity: quantity,
+                unit: unit,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String uuid,
+                required int crossingId,
+                required int cargoTypeId,
+                Value<double?> quantity = const Value.absent(),
+                Value<String?> unit = const Value.absent(),
+                required DateTime createdAt,
+              }) => CrossingCargosCompanion.insert(
+                id: id,
+                uuid: uuid,
+                crossingId: crossingId,
+                cargoTypeId: cargoTypeId,
+                quantity: quantity,
+                unit: unit,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CrossingCargosTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({crossingId = false, cargoTypeId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (crossingId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.crossingId,
+                                referencedTable: $$CrossingCargosTableReferences
+                                    ._crossingIdTable(db),
+                                referencedColumn:
+                                    $$CrossingCargosTableReferences
+                                        ._crossingIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+                    if (cargoTypeId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.cargoTypeId,
+                                referencedTable: $$CrossingCargosTableReferences
+                                    ._cargoTypeIdTable(db),
+                                referencedColumn:
+                                    $$CrossingCargosTableReferences
+                                        ._cargoTypeIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$CrossingCargosTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CrossingCargosTable,
+      CrossingCargo,
+      $$CrossingCargosTableFilterComposer,
+      $$CrossingCargosTableOrderingComposer,
+      $$CrossingCargosTableAnnotationComposer,
+      $$CrossingCargosTableCreateCompanionBuilder,
+      $$CrossingCargosTableUpdateCompanionBuilder,
+      (CrossingCargo, $$CrossingCargosTableReferences),
+      CrossingCargo,
+      PrefetchHooks Function({bool crossingId, bool cargoTypeId})
     >;
 typedef $$CrossingPhotosTableCreateCompanionBuilder =
     CrossingPhotosCompanion Function({
@@ -6604,6 +7292,8 @@ class $AppDatabaseManager {
       $$CargoTypesTableTableManager(_db, _db.cargoTypes);
   $$CrossingsTableTableManager get crossings =>
       $$CrossingsTableTableManager(_db, _db.crossings);
+  $$CrossingCargosTableTableManager get crossingCargos =>
+      $$CrossingCargosTableTableManager(_db, _db.crossingCargos);
   $$CrossingPhotosTableTableManager get crossingPhotos =>
       $$CrossingPhotosTableTableManager(_db, _db.crossingPhotos);
   $$ChangeHistoryTableTableManager get changeHistory =>

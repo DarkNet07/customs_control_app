@@ -336,4 +336,16 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get clear => 'Очистить';
+
+  @override
+  String get noPlateToggle => 'Нет гос. номера';
+
+  @override
+  String get noPlateNumber => 'Без номера';
+
+  @override
+  String get addCargo => 'Добавить груз';
+
+  @override
+  String get cargoList => 'Грузы';
 }

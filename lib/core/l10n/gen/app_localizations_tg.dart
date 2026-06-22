@@ -336,4 +336,16 @@ class AppLocalizationsTg extends AppLocalizations {
 
   @override
   String get clear => 'Тоза кардан';
+
+  @override
+  String get noPlateToggle => 'Рақам надорад';
+
+  @override
+  String get noPlateNumber => 'Бе рақам';
+
+  @override
+  String get addCargo => 'Илова кардани бор';
+
+  @override
+  String get cargoList => 'Борҳо';
 }

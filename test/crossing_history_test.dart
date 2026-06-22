@@ -21,19 +21,22 @@ void main() {
 
   tearDown(() => db.close());
 
-  Future<int> seedAndCreate() async {
+  Future<int> seedAndCreate({
+    String? plate = '01 A 123 BC',
+    List<CargoInput>? cargos,
+  }) async {
     final companyId = await companies.add('Acme');
     final makeId = await dict.addMake('Daewoo');
     final modelId = await dict.addModel(makeId, 'Damas');
     final cargoId = await dict.addCargoType('Овощи');
     return crossings.create(CrossingInput(
       companyId: companyId,
-      plateNumber: '01 A 123 BC',
-      plateCountry: 'uz',
-      plateFormatKey: 'uz_standard',
+      plateNumber: plate,
+      plateCountry: plate == null ? null : 'uz',
+      plateFormatKey: plate == null ? null : 'uz_standard',
       makeId: makeId,
       modelId: modelId,
-      cargoTypeId: cargoId,
+      cargos: cargos ?? [CargoInput(cargoTypeId: cargoId, quantity: 10, unit: 'т')],
       crossedAt: DateTime(2026, 1, 1, 10),
     ));
   }
@@ -43,6 +46,37 @@ void main() {
     final history = await crossings.history(id);
     expect(history.length, 1);
     expect(history.first.changeType, 'create');
+  });
+
+  test('several cargo lines are saved and read back', () async {
+    final companyId = await companies.add('Acme');
+    final makeId = await dict.addMake('Daewoo');
+    final c1 = await dict.addCargoType('Овощи');
+    final c2 = await dict.addCargoType('Текстиль');
+    final id = await crossings.create(CrossingInput(
+      companyId: companyId,
+      plateNumber: '01 A 123 BC',
+      plateCountry: 'uz',
+      plateFormatKey: 'uz_standard',
+      makeId: makeId,
+      modelId: null,
+      cargos: [
+        CargoInput(cargoTypeId: c1, quantity: 10, unit: 'т'),
+        CargoInput(cargoTypeId: c2),
+      ],
+      crossedAt: DateTime(2026, 1, 1, 10),
+    ));
+    final view = await crossings.getById(id);
+    expect(view!.cargos.length, 2);
+    expect(view.cargos.map((c) => c.cargoTypeName),
+        containsAll(['Овощи', 'Текстиль']));
+  });
+
+  test('record without a plate is saved and read back', () async {
+    final id = await seedAndCreate(plate: null);
+    final view = await crossings.getById(id);
+    expect(view!.crossing.plateNumber, isNull);
+    expect(view.hasPlate, isFalse);
   });
 
   test('update appends history and changes data', () async {
@@ -57,7 +91,7 @@ void main() {
         plateFormatKey: 'uz_standard',
         makeId: view.crossing.makeId,
         modelId: view.crossing.modelId,
-        cargoTypeId: view.crossing.cargoTypeId,
+        cargos: [CargoInput(cargoTypeId: view.cargos.first.cargoTypeId)],
         crossedAt: view.crossing.crossedAt,
       ),
     );

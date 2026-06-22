@@ -13,76 +13,68 @@ class LocalCrossingRepository implements CrossingRepository {
   final _uuid = const Uuid();
 
   // ---------------------------------------------------------------------------
-  // Read with joins, search, filters, sorting.
+  // Read: SQL handles joins + non-cargo filters; cargo filter/search/sort are
+  // applied in Dart (cargo is now one-to-many).
   // ---------------------------------------------------------------------------
-  JoinedSelectStatement _joined(CrossingQuery q) {
+  JoinedSelectStatement _baseQuery({
+    int? companyId,
+    int? makeId,
+    DateTime? from,
+    DateTime? to,
+  }) {
     final c = db.crossings;
     final company = db.companies;
     final make = db.vehicleMakes;
     final model = db.vehicleModels;
-    final cargo = db.cargoTypes;
 
     final query = db.select(c).join([
       innerJoin(company, company.id.equalsExp(c.companyId)),
       innerJoin(make, make.id.equalsExp(c.makeId)),
       leftOuterJoin(model, model.id.equalsExp(c.modelId)),
-      innerJoin(cargo, cargo.id.equalsExp(c.cargoTypeId)),
     ]);
 
     final filters = <Expression<bool>>[c.isDeleted.equals(false)];
-
-    if (q.companyId != null) filters.add(c.companyId.equals(q.companyId!));
-    if (q.makeId != null) filters.add(c.makeId.equals(q.makeId!));
-    if (q.cargoTypeId != null) {
-      filters.add(c.cargoTypeId.equals(q.cargoTypeId!));
-    }
-    if (q.from != null) {
-      filters.add(c.crossedAt.isBiggerOrEqualValue(q.from!));
-    }
-    if (q.to != null) filters.add(c.crossedAt.isSmallerOrEqualValue(q.to!));
-
-    if (q.search.trim().isNotEmpty) {
-      final term = '%${q.search.trim().toLowerCase()}%';
-      filters.add(c.plateNumber.lower().like(term) |
-          company.name.lower().like(term) |
-          make.name.lower().like(term) |
-          model.name.lower().like(term) |
-          cargo.name.lower().like(term));
-    }
-
+    if (companyId != null) filters.add(c.companyId.equals(companyId));
+    if (makeId != null) filters.add(c.makeId.equals(makeId));
+    if (from != null) filters.add(c.crossedAt.isBiggerOrEqualValue(from));
+    if (to != null) filters.add(c.crossedAt.isSmallerOrEqualValue(to));
     query.where(filters.reduce((a, b) => a & b));
-
-    final asc = q.direction == SortDirection.asc;
-    OrderingTerm term(Expression<Object> e) =>
-        asc ? OrderingTerm.asc(e) : OrderingTerm.desc(e);
-    switch (q.sort) {
-      case CrossingSort.company:
-        query.orderBy([term(company.name)]);
-      case CrossingSort.make:
-        query.orderBy([term(make.name)]);
-      case CrossingSort.plate:
-        query.orderBy([term(c.plateNumber)]);
-      case CrossingSort.time:
-        query.orderBy([term(c.crossedAt)]);
-      case CrossingSort.cargo:
-        query.orderBy([term(cargo.name)]);
-    }
+    query.orderBy([OrderingTerm.desc(c.crossedAt)]);
     return query;
   }
 
   Future<List<CrossingView>> _mapRows(List<TypedResult> rows) async {
     if (rows.isEmpty) return [];
-    final crossings = rows
-        .map((r) => r.readTable(db.crossings))
-        .toList();
-    final ids = crossings.map((c) => c.id).toList();
+    final ids = rows.map((r) => r.readTable(db.crossings).id).toList();
+
     final photos = await (db.select(db.crossingPhotos)
           ..where((t) => t.crossingId.isIn(ids))
           ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
         .get();
-    final byCrossing = <int, List<CrossingPhoto>>{};
+    final photosBy = <int, List<CrossingPhoto>>{};
     for (final ph in photos) {
-      byCrossing.putIfAbsent(ph.crossingId, () => []).add(ph);
+      photosBy.putIfAbsent(ph.crossingId, () => []).add(ph);
+    }
+
+    final cc = db.crossingCargos;
+    final ct = db.cargoTypes;
+    final cargoRows = await (db.select(cc).join([
+      innerJoin(ct, ct.id.equalsExp(cc.cargoTypeId)),
+    ])
+          ..where(cc.crossingId.isIn(ids))
+          ..orderBy([OrderingTerm.asc(cc.createdAt), OrderingTerm.asc(cc.id)]))
+        .get();
+    final cargosBy = <int, List<CargoLine>>{};
+    for (final r in cargoRows) {
+      final row = r.readTable(cc);
+      cargosBy.putIfAbsent(row.crossingId, () => []).add(
+            CargoLine(
+              cargoTypeId: row.cargoTypeId,
+              cargoTypeName: r.readTable(ct).name,
+              quantity: row.quantity,
+              unit: row.unit,
+            ),
+          );
     }
 
     return rows.map((r) {
@@ -93,15 +85,61 @@ class LocalCrossingRepository implements CrossingRepository {
         companyName: r.readTable(db.companies).name,
         makeName: r.readTable(db.vehicleMakes).name,
         modelName: model?.name,
-        cargoTypeName: r.readTable(db.cargoTypes).name,
-        photos: byCrossing[cr.id] ?? const [],
+        cargos: cargosBy[cr.id] ?? const [],
+        photos: photosBy[cr.id] ?? const [],
       );
     }).toList();
   }
 
+  List<CrossingView> _postProcess(List<CrossingView> list, CrossingQuery q) {
+    var result = list;
+
+    if (q.cargoTypeId != null) {
+      result = result
+          .where((v) => v.cargos.any((c) => c.cargoTypeId == q.cargoTypeId))
+          .toList();
+    }
+
+    final term = q.search.trim().toLowerCase();
+    if (term.isNotEmpty) {
+      result = result.where((v) {
+        final hay = [
+          v.crossing.plateNumber ?? '',
+          v.companyName,
+          v.makeName,
+          v.modelName ?? '',
+          ...v.cargos.map((c) => c.cargoTypeName),
+        ].join(' ').toLowerCase();
+        return hay.contains(term);
+      }).toList();
+    }
+
+    int cmp(CrossingView a, CrossingView b) => switch (q.sort) {
+          CrossingSort.company =>
+            a.companyName.toLowerCase().compareTo(b.companyName.toLowerCase()),
+          CrossingSort.make =>
+            a.makeName.toLowerCase().compareTo(b.makeName.toLowerCase()),
+          CrossingSort.plate => (a.crossing.plateNumber ?? '')
+              .compareTo(b.crossing.plateNumber ?? ''),
+          CrossingSort.time =>
+            a.crossing.crossedAt.compareTo(b.crossing.crossedAt),
+          CrossingSort.cargo =>
+            a.cargoSummary.toLowerCase().compareTo(b.cargoSummary.toLowerCase()),
+        };
+
+    result = [...result]..sort(cmp);
+    if (q.direction == SortDirection.desc) result = result.reversed.toList();
+    return result;
+  }
+
   @override
   Stream<List<CrossingView>> watchCrossings(CrossingQuery query) {
-    return _joined(query).watch().asyncMap(_mapRows);
+    return _baseQuery(
+      companyId: query.companyId,
+      makeId: query.makeId,
+      from: query.from,
+      to: query.to,
+    ).watch().asyncMap(_mapRows).map((list) => _postProcess(list, query));
   }
 
   @override
@@ -111,7 +149,6 @@ class LocalCrossingRepository implements CrossingRepository {
       innerJoin(db.companies, db.companies.id.equalsExp(c.companyId)),
       innerJoin(db.vehicleMakes, db.vehicleMakes.id.equalsExp(c.makeId)),
       leftOuterJoin(db.vehicleModels, db.vehicleModels.id.equalsExp(c.modelId)),
-      innerJoin(db.cargoTypes, db.cargoTypes.id.equalsExp(c.cargoTypeId)),
     ])
       ..where(c.id.equals(id));
     final rows = await query.get();
@@ -121,12 +158,7 @@ class LocalCrossingRepository implements CrossingRepository {
 
   @override
   Future<List<CrossingView>> getAllForExport({DateTime? from, DateTime? to}) {
-    return _joined(CrossingQuery(
-      from: from,
-      to: to,
-      sort: CrossingSort.time,
-      direction: SortDirection.desc,
-    )).get().then(_mapRows);
+    return _baseQuery(from: from, to: to).get().then(_mapRows);
   }
 
   // ---------------------------------------------------------------------------
@@ -136,14 +168,11 @@ class LocalCrossingRepository implements CrossingRepository {
     return CrossingsCompanion.insert(
       uuid: _uuid.v4(),
       companyId: i.companyId,
-      plateNumber: i.plateNumber.trim().toUpperCase(),
-      plateCountry: i.plateCountry,
-      plateFormatKey: i.plateFormatKey,
+      plateNumber: Value(i.plateNumber?.trim().toUpperCase()),
+      plateCountry: Value(i.plateCountry),
+      plateFormatKey: Value(i.plateFormatKey),
       makeId: i.makeId,
       modelId: Value(i.modelId),
-      cargoTypeId: i.cargoTypeId,
-      cargoQuantity: Value(i.cargoQuantity),
-      quantityUnit: Value(i.quantityUnit),
       crossedAt: i.crossedAt,
       latitude: Value(i.latitude),
       longitude: Value(i.longitude),
@@ -159,6 +188,7 @@ class LocalCrossingRepository implements CrossingRepository {
       final now = DateTime.now();
       final id =
           await db.into(db.crossings).insert(_companion(input, now: now));
+      await _insertCargos(id, input);
       await _insertPhotos(id, input);
       final view = await getById(id);
       await db.recordHistory(id, 'create', _createSnap(view));
@@ -174,14 +204,11 @@ class LocalCrossingRepository implements CrossingRepository {
       await (db.update(db.crossings)..where((t) => t.id.equals(id))).write(
         CrossingsCompanion(
           companyId: Value(input.companyId),
-          plateNumber: Value(input.plateNumber.trim().toUpperCase()),
+          plateNumber: Value(input.plateNumber?.trim().toUpperCase()),
           plateCountry: Value(input.plateCountry),
           plateFormatKey: Value(input.plateFormatKey),
           makeId: Value(input.makeId),
           modelId: Value(input.modelId),
-          cargoTypeId: Value(input.cargoTypeId),
-          cargoQuantity: Value(input.cargoQuantity),
-          quantityUnit: Value(input.quantityUnit),
           crossedAt: Value(input.crossedAt),
           latitude: Value(input.latitude),
           longitude: Value(input.longitude),
@@ -191,13 +218,16 @@ class LocalCrossingRepository implements CrossingRepository {
         ),
       );
 
-      // Replace photos with the new set.
+      // Replace cargo lines and photos with the new sets.
+      await (db.delete(db.crossingCargos)
+            ..where((t) => t.crossingId.equals(id)))
+          .go();
+      await _insertCargos(id, input);
       await (db.delete(db.crossingPhotos)
             ..where((t) => t.crossingId.equals(id)))
           .go();
       await _insertPhotos(id, input);
 
-      // Record only the fields that actually changed (before → after).
       final after = await getById(id);
       await db.recordHistory(id, 'update', _updateSnap(before, after));
     });
@@ -222,6 +252,22 @@ class LocalCrossingRepository implements CrossingRepository {
   Future<List<ChangeHistoryData>> history(int crossingId) =>
       db.historyFor(crossingId);
 
+  Future<void> _insertCargos(int crossingId, CrossingInput input) async {
+    final now = DateTime.now();
+    for (final cg in input.cargos) {
+      await db.into(db.crossingCargos).insert(
+            CrossingCargosCompanion.insert(
+              uuid: _uuid.v4(),
+              crossingId: crossingId,
+              cargoTypeId: cg.cargoTypeId,
+              quantity: Value(cg.quantity),
+              unit: Value(cg.unit),
+              createdAt: now,
+            ),
+          );
+    }
+  }
+
   Future<void> _insertPhotos(int crossingId, CrossingInput input) async {
     final now = DateTime.now();
     for (final ph in input.photoPaths) {
@@ -245,9 +291,11 @@ class LocalCrossingRepository implements CrossingRepository {
       'plateNumber': c.plateNumber,
       'company': v.companyName,
       'vehicle': v.vehicleLabel,
-      'cargoType': v.cargoTypeName,
-      'cargoQuantity': c.cargoQuantity?.toString(),
-      'quantityUnit': c.quantityUnit,
+      'cargo': v.cargos
+          .map((cg) => [cg.cargoTypeName, cg.quantityLabel]
+              .where((s) => s.isNotEmpty)
+              .join(' '))
+          .join('; '),
       'crossedAt': c.crossedAt.toIso8601String(),
       'note': c.note,
       'photos': v.photos.length.toString(),
