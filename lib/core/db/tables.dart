@@ -55,6 +55,8 @@ class Crossings extends Table {
   RealColumn get cargoQuantity => real().nullable()();
   TextColumn get quantityUnit => text().nullable()();
   DateTimeColumn get crossedAt => dateTime()();
+  RealColumn get latitude => real().nullable()();
+  RealColumn get longitude => real().nullable()();
   TextColumn get note => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();

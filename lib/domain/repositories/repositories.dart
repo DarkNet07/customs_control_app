@@ -16,6 +16,8 @@ class CrossingInput {
     this.cargoQuantity,
     this.quantityUnit,
     this.note,
+    this.latitude,
+    this.longitude,
     this.photoPaths = const [],
   });
 
@@ -30,6 +32,8 @@ class CrossingInput {
   final double? cargoQuantity;
   final String? quantityUnit;
   final String? note;
+  final double? latitude;
+  final double? longitude;
 
   /// Pairs of (compressed file path, thumbnail path).
   final List<({String filePath, String thumbPath})> photoPaths;

@@ -318,4 +318,22 @@ class AppLocalizationsTg extends AppLocalizations {
 
   @override
   String get quantity => 'Миқдор';
+
+  @override
+  String get location => 'Ҷойгиршавӣ';
+
+  @override
+  String get captureLocation => 'Муайян кардани ҷойгиршавӣ';
+
+  @override
+  String get locationUnavailable => 'Ҷойгиршавӣ муайян нашуд';
+
+  @override
+  String get coordinates => 'Координатаҳо';
+
+  @override
+  String get openInMaps => 'Кушодан дар харита';
+
+  @override
+  String get clear => 'Тоза кардан';
 }

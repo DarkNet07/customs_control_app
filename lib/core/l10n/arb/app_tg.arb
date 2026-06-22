@@ -102,5 +102,11 @@
   "changeCreate": "Сохтан",
   "changeUpdate": "Тағйир",
   "changeDelete": "Несткунӣ",
-  "quantity": "Миқдор"
+  "quantity": "Миқдор",
+  "location": "Ҷойгиршавӣ",
+  "captureLocation": "Муайян кардани ҷойгиршавӣ",
+  "locationUnavailable": "Ҷойгиршавӣ муайян нашуд",
+  "coordinates": "Координатаҳо",
+  "openInMaps": "Кушодан дар харита",
+  "clear": "Тоза кардан"
 }

@@ -72,4 +72,7 @@
 	<string>Приложению нужен доступ к галерее для добавления фото транспортных средств.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Face ID используется для защиты входа в приложение.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Геолокация используется для привязки места пересечения к записи.</string>
 </dict>
+</plist>

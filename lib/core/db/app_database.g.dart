@@ -1757,6 +1757,28 @@ class $CrossingsTable extends Crossings
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _latitudeMeta = const VerificationMeta(
+    'latitude',
+  );
+  @override
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+    'latitude',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _longitudeMeta = const VerificationMeta(
+    'longitude',
+  );
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+    'longitude',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _noteMeta = const VerificationMeta('note');
   @override
   late final GeneratedColumn<String> note = GeneratedColumn<String>(
@@ -1840,6 +1862,8 @@ class $CrossingsTable extends Crossings
     cargoQuantity,
     quantityUnit,
     crossedAt,
+    latitude,
+    longitude,
     note,
     createdAt,
     updatedAt,
@@ -1962,6 +1986,18 @@ class $CrossingsTable extends Crossings
     } else if (isInserting) {
       context.missing(_crossedAtMeta);
     }
+    if (data.containsKey('latitude')) {
+      context.handle(
+        _latitudeMeta,
+        latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta),
+      );
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(
+        _longitudeMeta,
+        longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta),
+      );
+    }
     if (data.containsKey('note')) {
       context.handle(
         _noteMeta,
@@ -2059,6 +2095,14 @@ class $CrossingsTable extends Crossings
         DriftSqlType.dateTime,
         data['${effectivePrefix}crossed_at'],
       )!,
+      latitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}latitude'],
+      ),
+      longitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}longitude'],
+      ),
       note: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}note'],
@@ -2105,6 +2149,8 @@ class Crossing extends DataClass implements Insertable<Crossing> {
   final double? cargoQuantity;
   final String? quantityUnit;
   final DateTime crossedAt;
+  final double? latitude;
+  final double? longitude;
   final String? note;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -2124,6 +2170,8 @@ class Crossing extends DataClass implements Insertable<Crossing> {
     this.cargoQuantity,
     this.quantityUnit,
     required this.crossedAt,
+    this.latitude,
+    this.longitude,
     this.note,
     required this.createdAt,
     required this.updatedAt,
@@ -2152,6 +2200,12 @@ class Crossing extends DataClass implements Insertable<Crossing> {
       map['quantity_unit'] = Variable<String>(quantityUnit);
     }
     map['crossed_at'] = Variable<DateTime>(crossedAt);
+    if (!nullToAbsent || latitude != null) {
+      map['latitude'] = Variable<double>(latitude);
+    }
+    if (!nullToAbsent || longitude != null) {
+      map['longitude'] = Variable<double>(longitude);
+    }
     if (!nullToAbsent || note != null) {
       map['note'] = Variable<String>(note);
     }
@@ -2185,6 +2239,12 @@ class Crossing extends DataClass implements Insertable<Crossing> {
           ? const Value.absent()
           : Value(quantityUnit),
       crossedAt: Value(crossedAt),
+      latitude: latitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(latitude),
+      longitude: longitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(longitude),
       note: note == null && nullToAbsent ? const Value.absent() : Value(note),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
@@ -2214,6 +2274,8 @@ class Crossing extends DataClass implements Insertable<Crossing> {
       cargoQuantity: serializer.fromJson<double?>(json['cargoQuantity']),
       quantityUnit: serializer.fromJson<String?>(json['quantityUnit']),
       crossedAt: serializer.fromJson<DateTime>(json['crossedAt']),
+      latitude: serializer.fromJson<double?>(json['latitude']),
+      longitude: serializer.fromJson<double?>(json['longitude']),
       note: serializer.fromJson<String?>(json['note']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
@@ -2238,6 +2300,8 @@ class Crossing extends DataClass implements Insertable<Crossing> {
       'cargoQuantity': serializer.toJson<double?>(cargoQuantity),
       'quantityUnit': serializer.toJson<String?>(quantityUnit),
       'crossedAt': serializer.toJson<DateTime>(crossedAt),
+      'latitude': serializer.toJson<double?>(latitude),
+      'longitude': serializer.toJson<double?>(longitude),
       'note': serializer.toJson<String?>(note),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
@@ -2260,6 +2324,8 @@ class Crossing extends DataClass implements Insertable<Crossing> {
     Value<double?> cargoQuantity = const Value.absent(),
     Value<String?> quantityUnit = const Value.absent(),
     DateTime? crossedAt,
+    Value<double?> latitude = const Value.absent(),
+    Value<double?> longitude = const Value.absent(),
     Value<String?> note = const Value.absent(),
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -2281,6 +2347,8 @@ class Crossing extends DataClass implements Insertable<Crossing> {
         : this.cargoQuantity,
     quantityUnit: quantityUnit.present ? quantityUnit.value : this.quantityUnit,
     crossedAt: crossedAt ?? this.crossedAt,
+    latitude: latitude.present ? latitude.value : this.latitude,
+    longitude: longitude.present ? longitude.value : this.longitude,
     note: note.present ? note.value : this.note,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -2314,6 +2382,8 @@ class Crossing extends DataClass implements Insertable<Crossing> {
           ? data.quantityUnit.value
           : this.quantityUnit,
       crossedAt: data.crossedAt.present ? data.crossedAt.value : this.crossedAt,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
       note: data.note.present ? data.note.value : this.note,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
@@ -2340,6 +2410,8 @@ class Crossing extends DataClass implements Insertable<Crossing> {
           ..write('cargoQuantity: $cargoQuantity, ')
           ..write('quantityUnit: $quantityUnit, ')
           ..write('crossedAt: $crossedAt, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -2364,6 +2436,8 @@ class Crossing extends DataClass implements Insertable<Crossing> {
     cargoQuantity,
     quantityUnit,
     crossedAt,
+    latitude,
+    longitude,
     note,
     createdAt,
     updatedAt,
@@ -2387,6 +2461,8 @@ class Crossing extends DataClass implements Insertable<Crossing> {
           other.cargoQuantity == this.cargoQuantity &&
           other.quantityUnit == this.quantityUnit &&
           other.crossedAt == this.crossedAt &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
           other.note == this.note &&
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
@@ -2408,6 +2484,8 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
   final Value<double?> cargoQuantity;
   final Value<String?> quantityUnit;
   final Value<DateTime> crossedAt;
+  final Value<double?> latitude;
+  final Value<double?> longitude;
   final Value<String?> note;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
@@ -2427,6 +2505,8 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
     this.cargoQuantity = const Value.absent(),
     this.quantityUnit = const Value.absent(),
     this.crossedAt = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
     this.note = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
@@ -2447,6 +2527,8 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
     this.cargoQuantity = const Value.absent(),
     this.quantityUnit = const Value.absent(),
     required DateTime crossedAt,
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
     this.note = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
@@ -2476,6 +2558,8 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
     Expression<double>? cargoQuantity,
     Expression<String>? quantityUnit,
     Expression<DateTime>? crossedAt,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
     Expression<String>? note,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
@@ -2496,6 +2580,8 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
       if (cargoQuantity != null) 'cargo_quantity': cargoQuantity,
       if (quantityUnit != null) 'quantity_unit': quantityUnit,
       if (crossedAt != null) 'crossed_at': crossedAt,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
       if (note != null) 'note': note,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
@@ -2518,6 +2604,8 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
     Value<double?>? cargoQuantity,
     Value<String?>? quantityUnit,
     Value<DateTime>? crossedAt,
+    Value<double?>? latitude,
+    Value<double?>? longitude,
     Value<String?>? note,
     Value<DateTime>? createdAt,
     Value<DateTime>? updatedAt,
@@ -2538,6 +2626,8 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
       cargoQuantity: cargoQuantity ?? this.cargoQuantity,
       quantityUnit: quantityUnit ?? this.quantityUnit,
       crossedAt: crossedAt ?? this.crossedAt,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
       note: note ?? this.note,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -2586,6 +2676,12 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
     if (crossedAt.present) {
       map['crossed_at'] = Variable<DateTime>(crossedAt.value);
     }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
+    }
     if (note.present) {
       map['note'] = Variable<String>(note.value);
     }
@@ -2622,6 +2718,8 @@ class CrossingsCompanion extends UpdateCompanion<Crossing> {
           ..write('cargoQuantity: $cargoQuantity, ')
           ..write('quantityUnit: $quantityUnit, ')
           ..write('crossedAt: $crossedAt, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
           ..write('note: $note, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
@@ -4969,6 +5067,8 @@ typedef $$CrossingsTableCreateCompanionBuilder =
       Value<double?> cargoQuantity,
       Value<String?> quantityUnit,
       required DateTime crossedAt,
+      Value<double?> latitude,
+      Value<double?> longitude,
       Value<String?> note,
       required DateTime createdAt,
       required DateTime updatedAt,
@@ -4990,6 +5090,8 @@ typedef $$CrossingsTableUpdateCompanionBuilder =
       Value<double?> cargoQuantity,
       Value<String?> quantityUnit,
       Value<DateTime> crossedAt,
+      Value<double?> latitude,
+      Value<double?> longitude,
       Value<String?> note,
       Value<DateTime> createdAt,
       Value<DateTime> updatedAt,
@@ -5135,6 +5237,16 @@ class $$CrossingsTableFilterComposer
 
   ColumnFilters<DateTime> get crossedAt => $composableBuilder(
     column: $table.crossedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+    column: $table.longitude,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5335,6 +5447,16 @@ class $$CrossingsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get note => $composableBuilder(
     column: $table.note,
     builder: (column) => ColumnOrderings(column),
@@ -5500,6 +5622,12 @@ class $$CrossingsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get crossedAt =>
       $composableBuilder(column: $table.crossedAt, builder: (column) => column);
+
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
 
   GeneratedColumn<String> get note =>
       $composableBuilder(column: $table.note, builder: (column) => column);
@@ -5685,6 +5813,8 @@ class $$CrossingsTableTableManager
                 Value<double?> cargoQuantity = const Value.absent(),
                 Value<String?> quantityUnit = const Value.absent(),
                 Value<DateTime> crossedAt = const Value.absent(),
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
@@ -5704,6 +5834,8 @@ class $$CrossingsTableTableManager
                 cargoQuantity: cargoQuantity,
                 quantityUnit: quantityUnit,
                 crossedAt: crossedAt,
+                latitude: latitude,
+                longitude: longitude,
                 note: note,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
@@ -5725,6 +5857,8 @@ class $$CrossingsTableTableManager
                 Value<double?> cargoQuantity = const Value.absent(),
                 Value<String?> quantityUnit = const Value.absent(),
                 required DateTime crossedAt,
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
                 Value<String?> note = const Value.absent(),
                 required DateTime createdAt,
                 required DateTime updatedAt,
@@ -5744,6 +5878,8 @@ class $$CrossingsTableTableManager
                 cargoQuantity: cargoQuantity,
                 quantityUnit: quantityUnit,
                 crossedAt: crossedAt,
+                latitude: latitude,
+                longitude: longitude,
                 note: note,
                 createdAt: createdAt,
                 updatedAt: updatedAt,

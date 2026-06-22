@@ -40,6 +40,9 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
   int? _cargoTypeId;
   DateTime _crossedAt = DateTime.now();
   final List<StoredPhoto> _photos = [];
+  double? _lat;
+  double? _lng;
+  bool _locating = false;
 
   bool _loading = false;
   bool get _isEdit => widget.id != null;
@@ -47,7 +50,12 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
   @override
   void initState() {
     super.initState();
-    if (_isEdit) _prefill();
+    if (_isEdit) {
+      _prefill();
+    } else {
+      // Auto-capture location for a new record (best-effort).
+      WidgetsBinding.instance.addPostFrameCallback((_) => _captureLocation());
+    }
   }
 
   Future<void> _prefill() async {
@@ -67,6 +75,8 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
     _modelId = c.modelId;
     _cargoTypeId = c.cargoTypeId;
     _crossedAt = c.crossedAt;
+    _lat = c.latitude;
+    _lng = c.longitude;
     _quantityController.text = c.cargoQuantity?.toString() ?? '';
     _unitController.text = c.quantityUnit ?? '';
     _noteController.text = c.note ?? '';
@@ -124,6 +134,25 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
     }
   }
 
+  Future<void> _captureLocation() async {
+    if (_locating) return;
+    setState(() => _locating = true);
+    final lock = ref.read(lockProvider.notifier);
+    lock.suspendAutoLock(); // permission dialog backgrounds the app
+    try {
+      final point = await ref.read(locationServiceProvider).current();
+      if (point != null && mounted) {
+        setState(() {
+          _lat = point.lat;
+          _lng = point.lng;
+        });
+      }
+    } finally {
+      lock.resumeAutoLock();
+      if (mounted) setState(() => _locating = false);
+    }
+  }
+
   Future<void> _pickDateTime() async {
     final date = await showDatePicker(
       context: context,
@@ -175,6 +204,8 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
       note: _noteController.text.trim().isEmpty
           ? null
           : _noteController.text.trim(),
+      latitude: _lat,
+      longitude: _lng,
       photoPaths: _photos,
     );
     final repo = ref.read(crossingRepositoryProvider);
@@ -224,6 +255,8 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
               ),
               maxLines: 2,
             ),
+            const SizedBox(height: 16),
+            _locationSection(l10n),
             const SizedBox(height: 16),
             _photoSection(l10n),
             const SizedBox(height: 80),
@@ -564,6 +597,59 @@ class _CrossingFormScreenState extends ConsumerState<CrossingFormScreen> {
         ),
         child: Text(df.format(_crossedAt)),
       ),
+    );
+  }
+
+  Widget _locationSection(AppLocalizations l10n) {
+    final hasPoint = _lat != null && _lng != null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(l10n.location, style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Icon(
+              hasPoint ? Icons.location_on : Icons.location_off,
+              color: hasPoint
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).disabledColor,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                _locating
+                    ? '…'
+                    : hasPoint
+                        ? '${_lat!.toStringAsFixed(6)}, ${_lng!.toStringAsFixed(6)}'
+                        : l10n.locationUnavailable,
+              ),
+            ),
+            if (_locating)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else ...[
+              IconButton(
+                tooltip: l10n.captureLocation,
+                icon: const Icon(Icons.my_location),
+                onPressed: _captureLocation,
+              ),
+              if (hasPoint)
+                IconButton(
+                  tooltip: l10n.clear,
+                  icon: const Icon(Icons.clear),
+                  onPressed: () => setState(() {
+                    _lat = null;
+                    _lng = null;
+                  }),
+                ),
+            ],
+          ],
+        ),
+      ],
     );
   }
 

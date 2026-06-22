@@ -8,8 +8,11 @@ import 'package:intl/intl.dart';
 
 import '../../core/db/app_database.dart';
 import '../../core/l10n/l10n.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import '../../core/providers.dart';
 import '../../core/widgets/flag_icon.dart';
+import 'widgets/location_map.dart';
 import 'widgets/photo_viewer.dart';
 import 'widgets/plate_label.dart';
 
@@ -161,12 +164,76 @@ class _Body extends StatelessWidget {
         _row(context, l10n.crossedAt, df.format(c.crossedAt)),
         if (c.note != null && c.note!.isNotEmpty)
           _row(context, l10n.note, c.note!),
+        if (c.latitude != null && c.longitude != null) ...[
+          const SizedBox(height: 12),
+          _locationCard(context, l10n, c.latitude!, c.longitude!),
+        ],
         const Divider(height: 32),
         Text(l10n.history, style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         for (final h in history) _HistoryTile(entry: h),
       ],
     );
+  }
+
+  Widget _locationCard(
+      BuildContext context, AppLocalizations l10n, double lat, double lng) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(l10n.location,
+                  style: Theme.of(context).textTheme.titleMedium),
+            ),
+            Text('${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}',
+                style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () => _openExternalMap(lat, lng),
+          child: Stack(
+            children: [
+              LocationMap(lat: lat, lng: lng),
+              Positioned(
+                right: 8,
+                bottom: 8,
+                child: Material(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.open_in_new, size: 16),
+                        const SizedBox(width: 4),
+                        Text(l10n.openInMaps,
+                            style: Theme.of(context).textTheme.labelMedium),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _openExternalMap(double lat, double lng) async {
+    final geo = Uri.parse('geo:$lat,$lng?q=$lat,$lng');
+    if (await canLaunchUrl(geo)) {
+      await launchUrl(geo, mode: LaunchMode.externalApplication);
+      return;
+    }
+    final web = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+    await launchUrl(web, mode: LaunchMode.externalApplication);
   }
 
   Widget _row(BuildContext context, String label, String value) {

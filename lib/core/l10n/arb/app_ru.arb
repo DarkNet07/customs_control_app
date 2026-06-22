@@ -102,5 +102,11 @@
   "changeCreate": "Создание",
   "changeUpdate": "Изменение",
   "changeDelete": "Удаление",
-  "quantity": "Кол-во"
+  "quantity": "Кол-во",
+  "location": "Местоположение",
+  "captureLocation": "Определить местоположение",
+  "locationUnavailable": "Местоположение не определено",
+  "coordinates": "Координаты",
+  "openInMaps": "Открыть в картах",
+  "clear": "Очистить"
 }

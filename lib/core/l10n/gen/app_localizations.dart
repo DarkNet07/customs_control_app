@@ -715,6 +715,42 @@ abstract class AppLocalizations {
   /// In ru, this message translates to:
   /// **'Кол-во'**
   String get quantity;
+
+  /// No description provided for @location.
+  ///
+  /// In ru, this message translates to:
+  /// **'Местоположение'**
+  String get location;
+
+  /// No description provided for @captureLocation.
+  ///
+  /// In ru, this message translates to:
+  /// **'Определить местоположение'**
+  String get captureLocation;
+
+  /// No description provided for @locationUnavailable.
+  ///
+  /// In ru, this message translates to:
+  /// **'Местоположение не определено'**
+  String get locationUnavailable;
+
+  /// No description provided for @coordinates.
+  ///
+  /// In ru, this message translates to:
+  /// **'Координаты'**
+  String get coordinates;
+
+  /// No description provided for @openInMaps.
+  ///
+  /// In ru, this message translates to:
+  /// **'Открыть в картах'**
+  String get openInMaps;
+
+  /// No description provided for @clear.
+  ///
+  /// In ru, this message translates to:
+  /// **'Очистить'**
+  String get clear;
 }
 
 class _AppLocalizationsDelegate

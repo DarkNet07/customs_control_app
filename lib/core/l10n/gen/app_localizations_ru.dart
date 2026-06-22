@@ -318,4 +318,22 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get quantity => 'Кол-во';
+
+  @override
+  String get location => 'Местоположение';
+
+  @override
+  String get captureLocation => 'Определить местоположение';
+
+  @override
+  String get locationUnavailable => 'Местоположение не определено';
+
+  @override
+  String get coordinates => 'Координаты';
+
+  @override
+  String get openInMaps => 'Открыть в картах';
+
+  @override
+  String get clear => 'Очистить';
 }

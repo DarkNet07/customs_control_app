@@ -9,6 +9,7 @@ import '../domain/repositories/repositories.dart';
 import 'auth/auth_service.dart';
 import 'db/app_database.dart';
 import 'images/image_service.dart';
+import 'location/location_service.dart';
 
 // Barrel re-exports so feature files can import this single file.
 export '../domain/models/crossing_view.dart';
@@ -24,6 +25,9 @@ final databaseProvider = Provider<AppDatabase>((ref) {
 });
 
 final imageServiceProvider = Provider<ImageService>((ref) => ImageService());
+
+final locationServiceProvider =
+    Provider<LocationService>((ref) => LocationService());
 
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 

@@ -34,9 +34,12 @@ class _CustomsAppState extends ConsumerState<CustomsApp>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Re-lock when the app is sent to the background.
+    final lock = ref.read(lockProvider.notifier);
+    // Note when backgrounded; lock on resume only after the grace period.
     if (state == AppLifecycleState.paused) {
-      ref.read(lockProvider.notifier).relock();
+      lock.onPaused();
+    } else if (state == AppLifecycleState.resumed) {
+      lock.onResumed();
     }
   }
 
